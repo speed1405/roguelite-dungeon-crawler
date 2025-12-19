@@ -59,7 +59,7 @@ const BIOMES = {
         floor: '#1a0a2a',
         wall: '#0a0010',
         decoration: '#2a1a3a',
-        enemyTypes: ['VoidWalker', 'Dragon', 'Demon', 'EldrithHorror']
+        enemyTypes: ['VoidWalker', 'Dragon', 'Demon', 'EldritchHorror']
     }
 };
 
@@ -209,7 +209,7 @@ const ENEMY_TYPES = {
         size: 29,
         points: 65
     },
-    EldrithHorror: {
+    EldritchHorror: {
         color: '#2f0f3f',
         health: 150,
         damage: 35,

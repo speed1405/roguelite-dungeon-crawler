@@ -647,67 +647,99 @@ class Game {
                 const py = y * TILE_SIZE;
                 
                 if (this.dungeon[y][x] === 1) {
-                    // Enhanced wall rendering with 3D depth effect
+                    // Enhanced wall rendering with improved 3D depth effect
                     this.ctx.fillStyle = this.currentBiome.wall;
                     this.ctx.fillRect(px, py, TILE_SIZE, TILE_SIZE);
                     
-                    // Top highlight for 3D effect
-                    this.ctx.fillStyle = 'rgba(255, 255, 255, 0.15)';
-                    this.ctx.fillRect(px, py, TILE_SIZE, 4);
-                    this.ctx.fillRect(px, py, 4, TILE_SIZE);
+                    // Enhanced top and left highlights for stronger 3D effect
+                    this.ctx.fillStyle = 'rgba(255, 255, 255, 0.25)';
+                    this.ctx.fillRect(px, py, TILE_SIZE, 3);
+                    this.ctx.fillRect(px, py, 3, TILE_SIZE);
+                    this.ctx.fillStyle = 'rgba(255, 255, 255, 0.12)';
+                    this.ctx.fillRect(px + 3, py + 3, TILE_SIZE - 6, 2);
+                    this.ctx.fillRect(px + 3, py + 5, TILE_SIZE - 9, 2);
                     
-                    // Bottom/right shadow for depth
-                    this.ctx.fillStyle = 'rgba(0, 0, 0, 0.4)';
-                    this.ctx.fillRect(px, py + TILE_SIZE - 4, TILE_SIZE, 4);
-                    this.ctx.fillRect(px + TILE_SIZE - 4, py, 4, TILE_SIZE);
+                    // Enhanced bottom/right shadow for stronger depth
+                    this.ctx.fillStyle = 'rgba(0, 0, 0, 0.5)';
+                    this.ctx.fillRect(px, py + TILE_SIZE - 3, TILE_SIZE, 3);
+                    this.ctx.fillRect(px + TILE_SIZE - 3, py, 3, TILE_SIZE);
+                    this.ctx.fillStyle = 'rgba(0, 0, 0, 0.3)';
+                    this.ctx.fillRect(px + 3, py + TILE_SIZE - 5, TILE_SIZE - 6, 2);
+                    this.ctx.fillRect(px + TILE_SIZE - 5, py + 3, 2, TILE_SIZE - 6);
                     
-                    // Add texture variation based on position
+                    // Enhanced texture variation with more detail
                     const seed = (x * HASH_MULTIPLIER_X + y * HASH_MULTIPLIER_Y) % 100;
-                    if (seed < 30) {
+                    
+                    // Brick/stone pattern
+                    if (seed < 40) {
                         this.ctx.fillStyle = this.currentBiome.decoration;
-                        this.ctx.globalAlpha = 0.2;
-                        const brickX = px + (seed % 3) * 8;
-                        const brickY = py + (Math.floor(seed / 3) % 3) * 8;
-                        this.ctx.fillRect(brickX, brickY, 6, 6);
+                        this.ctx.globalAlpha = 0.25;
+                        const brickX = px + (seed % 4) * 8;
+                        const brickY = py + (Math.floor(seed / 4) % 4) * 8;
+                        this.ctx.fillRect(brickX, brickY, 7, 7);
                         this.ctx.globalAlpha = 1;
                     }
                     
-                    // Border for definition
-                    this.ctx.strokeStyle = 'rgba(0, 0, 0, 0.6)';
+                    // Cracks and details
+                    if (seed % 7 === 0) {
+                        this.ctx.fillStyle = 'rgba(0, 0, 0, 0.4)';
+                        const crackX = px + ((seed * 3) % (TILE_SIZE - 12)) + 4;
+                        const crackY = py + ((seed * 5) % (TILE_SIZE - 8)) + 4;
+                        this.ctx.fillRect(crackX, crackY, 8, 1);
+                        this.ctx.fillRect(crackX + 3, crackY + 1, 1, 4);
+                    }
+                    
+                    // Enhanced border for definition with double outline
+                    this.ctx.strokeStyle = 'rgba(0, 0, 0, 0.7)';
                     this.ctx.strokeRect(px, py, TILE_SIZE, TILE_SIZE);
+                    this.ctx.strokeStyle = 'rgba(0, 0, 0, 0.3)';
+                    this.ctx.strokeRect(px + 1, py + 1, TILE_SIZE - 2, TILE_SIZE - 2);
                 } else {
-                    // Enhanced floor rendering with varied texture
+                    // Enhanced floor rendering with richer texture
                     this.ctx.fillStyle = this.currentBiome.floor;
                     this.ctx.fillRect(px, py, TILE_SIZE, TILE_SIZE);
                     
-                    // Checkerboard pattern for subtle variation
+                    // Enhanced checkerboard pattern for variation
                     if ((x + y) % 2 === 0) {
                         this.ctx.fillStyle = this.currentBiome.decoration;
-                        this.ctx.globalAlpha = 0.15;
+                        this.ctx.globalAlpha = 0.18;
                         this.ctx.fillRect(px, py, TILE_SIZE, TILE_SIZE);
                         this.ctx.globalAlpha = 1;
                     }
                     
-                    // Add deterministic pixel details for variety
+                    // Add more deterministic pixel details for variety
                     const seed = x * HASH_MULTIPLIER_X + y * HASH_MULTIPLIER_Y;
+                    
+                    // Primary texture details
                     if (seed % TEXTURE_FREQUENCY === 0) {
                         this.ctx.fillStyle = this.currentBiome.decoration;
-                        this.ctx.globalAlpha = 0.3;
-                        const pixelX = px + ((seed * 3) % (TILE_SIZE - 6)) + 2;
-                        const pixelY = py + ((seed * 5) % (TILE_SIZE - 6)) + 2;
-                        this.ctx.fillRect(pixelX, pixelY, 3, 3);
+                        this.ctx.globalAlpha = 0.35;
+                        const pixelX = px + ((seed * 3) % (TILE_SIZE - 8)) + 2;
+                        const pixelY = py + ((seed * 5) % (TILE_SIZE - 8)) + 2;
+                        this.ctx.fillRect(pixelX, pixelY, 4, 4);
                         this.ctx.globalAlpha = 1;
                     }
                     
-                    // Random crack/detail variations
-                    if (seed % 13 === 0) {
-                        this.ctx.fillStyle = 'rgba(0, 0, 0, 0.2)';
-                        const crackX = px + ((seed * 7) % (TILE_SIZE - 8)) + 2;
-                        const crackY = py + ((seed * 11) % (TILE_SIZE - 4)) + 2;
-                        this.ctx.fillRect(crackX, crackY, 6, 2);
+                    // Secondary details - spots and marks
+                    if (seed % 11 === 0) {
+                        this.ctx.fillStyle = this.currentBiome.decoration;
+                        this.ctx.globalAlpha = 0.2;
+                        const spotX = px + ((seed * 7) % (TILE_SIZE - 6)) + 2;
+                        const spotY = py + ((seed * 9) % (TILE_SIZE - 6)) + 2;
+                        this.ctx.fillRect(spotX, spotY, 5, 5);
+                        this.ctx.globalAlpha = 1;
                     }
                     
-                    // Subtle ambient shadow near walls
+                    // Enhanced crack/detail variations
+                    if (seed % 13 === 0) {
+                        this.ctx.fillStyle = 'rgba(0, 0, 0, 0.25)';
+                        const crackX = px + ((seed * 7) % (TILE_SIZE - 10)) + 2;
+                        const crackY = py + ((seed * 11) % (TILE_SIZE - 6)) + 2;
+                        this.ctx.fillRect(crackX, crackY, 8, 2);
+                        this.ctx.fillRect(crackX + 3, crackY + 2, 2, 3);
+                    }
+                    
+                    // Enhanced ambient shadow near walls with smoother gradient
                     let shadowIntensity = 0;
                     for (let dy = -1; dy <= 1; dy++) {
                         for (let dx = -1; dx <= 1; dx++) {
@@ -715,15 +747,21 @@ class Game {
                             const ny = y + dy;
                             if (nx >= 0 && nx < GRID_WIDTH && ny >= 0 && ny < GRID_HEIGHT) {
                                 if (this.dungeon[ny][nx] === 1) {
-                                    shadowIntensity += 0.05;
+                                    // Diagonal shadows are less intense
+                                    const isDiagonal = dx !== 0 && dy !== 0;
+                                    shadowIntensity += isDiagonal ? 0.03 : 0.06;
                                 }
                             }
                         }
                     }
                     if (shadowIntensity > 0) {
-                        this.ctx.fillStyle = `rgba(0, 0, 0, ${Math.min(shadowIntensity, 0.3)})`;
+                        this.ctx.fillStyle = `rgba(0, 0, 0, ${Math.min(shadowIntensity, 0.4)})`;
                         this.ctx.fillRect(px, py, TILE_SIZE, TILE_SIZE);
                     }
+                    
+                    // Subtle floor border for grid definition
+                    this.ctx.strokeStyle = 'rgba(0, 0, 0, 0.1)';
+                    this.ctx.strokeRect(px, py, TILE_SIZE, TILE_SIZE);
                 }
             }
         }
@@ -879,70 +917,146 @@ class Player {
         const x = Math.floor(this.x - halfSize);
         const y = Math.floor(this.y - halfSize);
         
-        // Shadow
-        ctx.fillStyle = 'rgba(0, 0, 0, 0.3)';
-        ctx.fillRect(x + 2, y + this.size - 2, this.size - 2, 4);
+        // Enhanced shadow with blur effect
+        ctx.fillStyle = 'rgba(0, 0, 0, 0.4)';
+        ctx.fillRect(x + 3, y + this.size - 1, this.size - 4, 5);
+        ctx.fillStyle = 'rgba(0, 0, 0, 0.2)';
+        ctx.fillRect(x + 1, y + this.size - 2, this.size - 1, 3);
         
-        // Main body with gradient effect
+        // Main body with class-specific color
         ctx.fillStyle = this.color;
         ctx.fillRect(x, y, this.size, this.size);
         
-        // Highlight (top-left)
-        ctx.fillStyle = '#6bc4ff';
-        ctx.fillRect(x, y, this.size / 2, 4);
-        ctx.fillRect(x, y, 4, this.size / 2);
+        // Add metallic/armor effect for certain classes
+        if (this.characterClass.name === 'Warrior' || this.characterClass.name === 'Paladin') {
+            // Armor plates effect
+            ctx.fillStyle = 'rgba(255, 255, 255, 0.2)';
+            ctx.fillRect(x + 4, y + 2, 4, 8);
+            ctx.fillRect(x + this.size - 8, y + 2, 4, 8);
+        }
         
-        // Darker shade (bottom-right)
-        ctx.fillStyle = '#2d7db8';
-        ctx.fillRect(x + this.size / 2, y + this.size - 4, this.size / 2, 4);
-        ctx.fillRect(x + this.size - 4, y + this.size / 2, 4, this.size / 2);
+        // Enhanced highlight with gradient effect (top-left)
+        ctx.fillStyle = 'rgba(255, 255, 255, 0.35)';
+        ctx.fillRect(x, y, this.size, 2);
+        ctx.fillRect(x, y, 2, this.size / 2);
+        ctx.fillStyle = 'rgba(255, 255, 255, 0.15)';
+        ctx.fillRect(x + 2, y + 2, this.size - 4, 2);
+        ctx.fillRect(x + 2, y + 4, this.size / 2 - 2, 2);
         
-        // Enhanced eyes with white background
+        // Darker shade for depth (bottom-right)
+        ctx.fillStyle = 'rgba(0, 0, 0, 0.3)';
+        ctx.fillRect(x, y + this.size - 2, this.size, 2);
+        ctx.fillRect(x + this.size - 2, y, 2, this.size);
+        ctx.fillStyle = 'rgba(0, 0, 0, 0.15)';
+        ctx.fillRect(x + 2, y + this.size - 4, this.size - 4, 2);
+        ctx.fillRect(x + this.size - 4, y + 2, 2, this.size - 4);
+        
+        // Enhanced eyes with larger white background and glow
+        ctx.fillStyle = 'rgba(255, 255, 255, 0.3)';
+        const eyeGlowSize = 8;
+        const eyeOffset = 5;
+        ctx.fillRect(Math.floor(this.x - eyeOffset - 2), Math.floor(this.y - eyeOffset - 1), eyeGlowSize, eyeGlowSize);
+        ctx.fillRect(Math.floor(this.x + eyeOffset - eyeGlowSize + 2), Math.floor(this.y - eyeOffset - 1), eyeGlowSize, eyeGlowSize);
+        
         ctx.fillStyle = '#ffffff';
         const eyeSize = 6;
-        const eyeOffset = 5;
         ctx.fillRect(Math.floor(this.x - eyeOffset - 1), Math.floor(this.y - eyeOffset), eyeSize, eyeSize);
         ctx.fillRect(Math.floor(this.x + eyeOffset - eyeSize + 1), Math.floor(this.y - eyeOffset), eyeSize, eyeSize);
         
-        // Eye pupils with better positioning
-        ctx.fillStyle = '#0066cc';
+        // Eye pupils with class-specific color
+        let pupilColor = '#0066cc';
+        if (this.characterClass.name === 'Mage') pupilColor = '#9b59b6';
+        else if (this.characterClass.name === 'Rogue') pupilColor = '#2ecc71';
+        else if (this.characterClass.name === 'Paladin') pupilColor = '#f1c40f';
+        
+        ctx.fillStyle = pupilColor;
         const pupilSize = 3;
         ctx.fillRect(Math.floor(this.x - eyeOffset), Math.floor(this.y - eyeOffset + 1), pupilSize, pupilSize);
         ctx.fillRect(Math.floor(this.x + eyeOffset - pupilSize), Math.floor(this.y - eyeOffset + 1), pupilSize, pupilSize);
         
-        // Add a smile/mouth
-        ctx.fillStyle = '#000000';
-        ctx.fillRect(Math.floor(this.x - 3), Math.floor(this.y + 4), 6, 2);
+        // Eye shine effect
+        ctx.fillStyle = 'rgba(255, 255, 255, 0.7)';
+        ctx.fillRect(Math.floor(this.x - eyeOffset), Math.floor(this.y - eyeOffset + 1), 1, 1);
+        ctx.fillRect(Math.floor(this.x + eyeOffset - pupilSize), Math.floor(this.y - eyeOffset + 1), 1, 1);
         
-        // Outline with pixel art style
-        ctx.strokeStyle = '#ffffff';
+        // Add a smile/mouth with better shading
+        ctx.fillStyle = '#000000';
+        ctx.fillRect(Math.floor(this.x - 4), Math.floor(this.y + 5), 8, 2);
+        ctx.fillStyle = 'rgba(255, 192, 203, 0.3)';
+        ctx.fillRect(Math.floor(this.x - 3), Math.floor(this.y + 5), 6, 1);
+        
+        // Weapon/class indicator
+        if (this.characterClass.name === 'Warrior') {
+            // Sword
+            ctx.fillStyle = '#c0c0c0';
+            ctx.fillRect(x + this.size - 2, y + 4, 4, 10);
+            ctx.fillStyle = '#8b4513';
+            ctx.fillRect(x + this.size - 2, y + 10, 4, 3);
+        } else if (this.characterClass.name === 'Mage') {
+            // Staff orb
+            ctx.fillStyle = '#9b59b6';
+            ctx.fillRect(x - 3, y + 6, 3, 3);
+            ctx.fillStyle = 'rgba(255, 255, 255, 0.5)';
+            ctx.fillRect(x - 3, y + 6, 1, 1);
+        } else if (this.characterClass.name === 'Rogue') {
+            // Dagger
+            ctx.fillStyle = '#666666';
+            ctx.fillRect(x + this.size, y + 8, 3, 6);
+        } else if (this.characterClass.name === 'Paladin') {
+            // Shield
+            ctx.fillStyle = '#f1c40f';
+            ctx.fillRect(x - 3, y + 4, 3, 8);
+            ctx.fillStyle = 'rgba(255, 255, 255, 0.3)';
+            ctx.fillRect(x - 3, y + 4, 3, 2);
+        }
+        
+        // Strong outline with pixel art style
+        ctx.strokeStyle = 'rgba(0, 0, 0, 0.8)';
         ctx.lineWidth = PIXEL_ART_OUTLINE_WIDTH;
         ctx.strokeRect(x, y, this.size, this.size);
         
-        // Inner dark outline for depth
-        ctx.strokeStyle = 'rgba(0, 0, 0, 0.3)';
+        // Bright outer glow for visibility
+        ctx.strokeStyle = 'rgba(255, 255, 255, 0.4)';
         ctx.lineWidth = 1;
-        ctx.strokeRect(x + 1, y + 1, this.size - 2, this.size - 2);
+        ctx.strokeRect(x - 1, y - 1, this.size + 2, this.size + 2);
         
-        // Draw enhanced attack indicator with slash effect
+        // Draw enhanced attack indicator with improved visual effects
         if (this.isAttacking && this.attackCooldown > 0.3) {
             const animProgress = (this.attackCooldown - 0.3) / 0.2;
             
-            // Circular attack range indicator
-            ctx.strokeStyle = 'rgba(255, 255, 0, 0.4)';
-            ctx.lineWidth = 3;
-            ctx.beginPath();
-            ctx.arc(Math.floor(this.x), Math.floor(this.y), this.attackRange, 0, Math.PI * 2);
-            ctx.stroke();
+            // Multiple circular wave effects
+            for (let i = 0; i < 3; i++) {
+                const waveRadius = this.attackRange * (0.6 + i * 0.15);
+                const alpha = animProgress * (0.3 - i * 0.1);
+                ctx.strokeStyle = `rgba(255, 255, 100, ${alpha})`;
+                ctx.lineWidth = 3 - i;
+                ctx.beginPath();
+                ctx.arc(Math.floor(this.x), Math.floor(this.y), waveRadius, 0, Math.PI * 2);
+                ctx.stroke();
+            }
             
-            // Animated slash effect
-            ctx.strokeStyle = `rgba(255, 255, 100, ${animProgress})`;
-            ctx.lineWidth = 4;
-            ctx.beginPath();
-            const slashAngle = animProgress * Math.PI * 0.5;
-            const slashRadius = this.attackRange * 0.8;
-            ctx.arc(Math.floor(this.x), Math.floor(this.y), slashRadius, -Math.PI/4 + slashAngle, Math.PI/4 + slashAngle);
-            ctx.stroke();
+            // Multiple slash effects
+            for (let i = 0; i < 4; i++) {
+                const slashAngle = animProgress * Math.PI * 0.7;
+                const slashRadius = this.attackRange * (0.7 + i * 0.05);
+                const alpha = animProgress * (0.8 - i * 0.15);
+                ctx.strokeStyle = `rgba(255, 255, 200, ${alpha})`;
+                ctx.lineWidth = 5 - i;
+                ctx.beginPath();
+                ctx.arc(Math.floor(this.x), Math.floor(this.y), slashRadius, -Math.PI/3 + slashAngle, Math.PI/3 + slashAngle);
+                ctx.stroke();
+            }
+            
+            // Particle burst effect
+            const particleCount = 8;
+            for (let i = 0; i < particleCount; i++) {
+                const angle = (i / particleCount) * Math.PI * 2;
+                const dist = this.attackRange * animProgress;
+                const px = this.x + Math.cos(angle) * dist;
+                const py = this.y + Math.sin(angle) * dist;
+                ctx.fillStyle = `rgba(255, 255, 100, ${animProgress * 0.6})`;
+                ctx.fillRect(Math.floor(px - 1), Math.floor(py - 1), 3, 3);
+            }
         }
     }
 }
@@ -1003,18 +1117,23 @@ class Enemy {
     }
     
     render(ctx) {
-        // Draw enemy with enhanced pixel art style
+        // Draw enemy with enhanced pixel art style and type-specific features
         const halfSize = Math.floor(this.size / 2);
         const x = Math.floor(this.x - halfSize);
         const y = Math.floor(this.y - halfSize);
         
-        // Shadow
-        ctx.fillStyle = 'rgba(0, 0, 0, 0.3)';
-        ctx.fillRect(x + 2, y + this.size - 2, this.size - 2, 4);
+        // Enhanced shadow with layered effect
+        ctx.fillStyle = 'rgba(0, 0, 0, 0.4)';
+        ctx.fillRect(x + 3, y + this.size - 1, this.size - 4, 5);
+        ctx.fillStyle = 'rgba(0, 0, 0, 0.2)';
+        ctx.fillRect(x + 1, y + this.size - 2, this.size - 1, 3);
         
         // Main body
         ctx.fillStyle = this.color;
         ctx.fillRect(x, y, this.size, this.size);
+        
+        // Type-specific visual features
+        this.renderTypeSpecificFeatures(ctx, x, y);
         
         // Add shading for depth based on color
         const darkerColor = this.getDarkerShade(this.color);
@@ -1022,18 +1141,31 @@ class Enemy {
         ctx.fillRect(x + this.size / 2, y + this.size - 4, this.size / 2, 4);
         ctx.fillRect(x + this.size - 4, y + this.size / 2, 4, this.size / 2);
         
-        // Add highlight
-        ctx.fillStyle = 'rgba(255, 255, 255, 0.3)';
-        ctx.fillRect(x, y, this.size / 2, 3);
-        ctx.fillRect(x, y, 3, this.size / 2);
+        // Enhanced highlight with gradient
+        ctx.fillStyle = 'rgba(255, 255, 255, 0.4)';
+        ctx.fillRect(x, y, this.size / 2, 2);
+        ctx.fillRect(x, y, 2, this.size / 2);
+        ctx.fillStyle = 'rgba(255, 255, 255, 0.15)';
+        ctx.fillRect(x + 2, y + 2, this.size / 2 - 2, 2);
         
-        // Enhanced eyes with glowing effect
+        // Enhanced eyes with more menacing glow
         const eyeSize = Math.max(3, Math.floor(this.size / 8));
         const eyeOffset = Math.floor(this.size / 4);
         
-        // Eye glow
-        ctx.fillStyle = 'rgba(255, 0, 0, 0.3)';
+        // Multi-layer eye glow
+        ctx.fillStyle = 'rgba(255, 0, 0, 0.2)';
+        ctx.fillRect(Math.floor(this.x - eyeOffset - 2), Math.floor(this.y - eyeOffset - 2), eyeSize + 4, eyeSize + 4);
+        ctx.fillStyle = 'rgba(255, 0, 0, 0.4)';
         ctx.fillRect(Math.floor(this.x - eyeOffset - 1), Math.floor(this.y - eyeOffset - 1), eyeSize + 2, eyeSize + 2);
+        
+        // Eye outer glow for bosses and strong enemies
+        if (this.maxHealth > 80) {
+            ctx.fillStyle = 'rgba(255, 50, 0, 0.3)';
+            ctx.fillRect(Math.floor(this.x - eyeOffset - 3), Math.floor(this.y - eyeOffset - 3), eyeSize + 6, eyeSize + 6);
+        }
+        
+        ctx.fillRect(Math.floor(this.x + eyeOffset - eyeSize - 2), Math.floor(this.y - eyeOffset - 2), eyeSize + 4, eyeSize + 4);
+        ctx.fillStyle = 'rgba(255, 0, 0, 0.4)';
         ctx.fillRect(Math.floor(this.x + eyeOffset - eyeSize - 1), Math.floor(this.y - eyeOffset - 1), eyeSize + 2, eyeSize + 2);
         
         // Eyes
@@ -1041,40 +1173,135 @@ class Enemy {
         ctx.fillRect(Math.floor(this.x - eyeOffset), Math.floor(this.y - eyeOffset), eyeSize, eyeSize);
         ctx.fillRect(Math.floor(this.x + eyeOffset - eyeSize), Math.floor(this.y - eyeOffset), eyeSize, eyeSize);
         
-        // Eye highlights for menacing look
-        ctx.fillStyle = '#ff6666';
+        // Eye highlights for menacing look with animation
+        const eyePulse = Math.sin(Date.now() / 200) * 0.3 + 0.7;
+        ctx.fillStyle = `rgba(255, 100, 100, ${eyePulse})`;
         const highlightSize = Math.max(1, Math.floor(eyeSize / 2));
         ctx.fillRect(Math.floor(this.x - eyeOffset), Math.floor(this.y - eyeOffset), highlightSize, highlightSize);
         ctx.fillRect(Math.floor(this.x + eyeOffset - eyeSize), Math.floor(this.y - eyeOffset), highlightSize, highlightSize);
         
-        // Outline with pixel art style
-        ctx.strokeStyle = '#000000';
+        // Strong outline for definition
+        ctx.strokeStyle = 'rgba(0, 0, 0, 0.9)';
         ctx.lineWidth = PIXEL_ART_OUTLINE_WIDTH;
         ctx.strokeRect(x, y, this.size, this.size);
         
-        // Draw enhanced health bar with border
-        const barWidth = this.size + 4;
-        const barHeight = 5;
+        // Outer glow for better visibility
+        ctx.strokeStyle = 'rgba(255, 255, 255, 0.2)';
+        ctx.lineWidth = 1;
+        ctx.strokeRect(x - 1, y - 1, this.size + 2, this.size + 2);
+        
+        // Draw enhanced health bar with border and glow
+        const barWidth = this.size + 6;
+        const barHeight = 6;
         const healthPercent = this.health / this.maxHealth;
+        
+        // Health bar outer glow
+        ctx.fillStyle = 'rgba(0, 255, 0, 0.2)';
+        ctx.fillRect(Math.floor(this.x - barWidth / 2) - 2, Math.floor(this.y - halfSize - 11) - 2, barWidth + 4, barHeight + 4);
         
         // Health bar background/border
         ctx.fillStyle = '#000000';
-        ctx.fillRect(Math.floor(this.x - barWidth / 2) - 1, Math.floor(this.y - halfSize - 10) - 1, barWidth + 2, barHeight + 2);
+        ctx.fillRect(Math.floor(this.x - barWidth / 2) - 1, Math.floor(this.y - halfSize - 11) - 1, barWidth + 2, barHeight + 2);
         
-        // Health bar red background
-        ctx.fillStyle = '#660000';
-        ctx.fillRect(Math.floor(this.x - barWidth / 2), Math.floor(this.y - halfSize - 10), barWidth, barHeight);
+        // Health bar dark red background
+        ctx.fillStyle = '#440000';
+        ctx.fillRect(Math.floor(this.x - barWidth / 2), Math.floor(this.y - halfSize - 11), barWidth, barHeight);
         
-        // Health bar green fill with gradient effect
+        // Health bar fill with color gradient based on health
         const healthWidth = Math.floor(barWidth * healthPercent);
         if (healthWidth > 0) {
-            // Green part
-            ctx.fillStyle = '#00ff00';
-            ctx.fillRect(Math.floor(this.x - barWidth / 2), Math.floor(this.y - halfSize - 10), healthWidth, barHeight);
+            // Color changes based on health percentage
+            let healthColor = '#00ff00'; // Green
+            if (healthPercent < 0.3) healthColor = '#ff3333'; // Red
+            else if (healthPercent < 0.6) healthColor = '#ffaa00'; // Orange
             
-            // Highlight on health bar
-            ctx.fillStyle = '#88ff88';
-            ctx.fillRect(Math.floor(this.x - barWidth / 2), Math.floor(this.y - halfSize - 10), healthWidth, 2);
+            ctx.fillStyle = healthColor;
+            ctx.fillRect(Math.floor(this.x - barWidth / 2), Math.floor(this.y - halfSize - 11), healthWidth, barHeight);
+            
+            // Bright highlight on health bar
+            ctx.fillStyle = 'rgba(255, 255, 255, 0.5)';
+            ctx.fillRect(Math.floor(this.x - barWidth / 2), Math.floor(this.y - halfSize - 11), healthWidth, 2);
+            
+            // Animated shimmer effect on health bar
+            const shimmerPos = (Date.now() / 500) % 1;
+            const shimmerX = Math.floor(this.x - barWidth / 2 + healthWidth * shimmerPos);
+            ctx.fillStyle = 'rgba(255, 255, 255, 0.4)';
+            ctx.fillRect(shimmerX, Math.floor(this.y - halfSize - 11), 2, barHeight);
+        }
+    }
+    
+    renderTypeSpecificFeatures(ctx, x, y) {
+        // Add unique visual features based on enemy type
+        switch(this.type) {
+            case 'Slime':
+                // Gooey texture
+                ctx.fillStyle = 'rgba(255, 255, 255, 0.2)';
+                ctx.fillRect(x + 4, y + 4, 4, 4);
+                ctx.fillRect(x + this.size - 8, y + this.size - 8, 4, 4);
+                break;
+            case 'Bat':
+            case 'FrostBat':
+                // Wing indicators
+                ctx.fillStyle = this.getDarkerShade(this.color);
+                ctx.fillRect(x - 3, y + this.size / 2, 3, 4);
+                ctx.fillRect(x + this.size, y + this.size / 2, 3, 4);
+                break;
+            case 'Skeleton':
+                // Bone structure
+                ctx.fillStyle = '#dddddd';
+                ctx.fillRect(x + this.size / 2 - 1, y + 4, 2, this.size - 8);
+                break;
+            case 'Dragon':
+            case 'FireElemental':
+                // Flames/spikes
+                ctx.fillStyle = '#ffaa00';
+                ctx.fillRect(x + 2, y - 2, 3, 3);
+                ctx.fillRect(x + this.size - 5, y - 2, 3, 3);
+                ctx.fillRect(x + this.size / 2 - 1, y - 3, 2, 3);
+                break;
+            case 'Ghost':
+            case 'Wraith':
+                // Ethereal trail
+                ctx.fillStyle = this.color;
+                ctx.globalAlpha = 0.3;
+                ctx.fillRect(x, y + this.size, this.size, 4);
+                ctx.globalAlpha = 1;
+                break;
+            case 'Knight':
+                // Helmet/armor
+                ctx.fillStyle = '#aaaaaa';
+                ctx.fillRect(x + 4, y + 2, this.size - 8, 3);
+                break;
+            case 'Vampire':
+                // Fangs
+                ctx.fillStyle = '#ffffff';
+                ctx.fillRect(x + 6, y + this.size - 8, 2, 3);
+                ctx.fillRect(x + this.size - 8, y + this.size - 8, 2, 3);
+                break;
+            case 'IceGolem':
+            case 'Yeti':
+                // Ice crystals
+                ctx.fillStyle = 'rgba(255, 255, 255, 0.7)';
+                ctx.fillRect(x + 2, y + 2, 2, 3);
+                ctx.fillRect(x + this.size - 4, y + 4, 2, 3);
+                ctx.fillRect(x + this.size / 2, y, 2, 2);
+                break;
+            case 'Demon':
+                // Horns
+                ctx.fillStyle = '#660000';
+                ctx.fillRect(x + 2, y - 2, 3, 4);
+                ctx.fillRect(x + this.size - 5, y - 2, 3, 4);
+                break;
+            case 'EldritchHorror':
+                // Tentacles
+                ctx.fillStyle = this.getDarkerShade(this.color);
+                for (let i = 0; i < 4; i++) {
+                    const angle = (i / 4) * Math.PI * 2;
+                    const tx = x + this.size / 2 + Math.cos(angle) * (this.size / 2 + 2);
+                    const ty = y + this.size / 2 + Math.sin(angle) * (this.size / 2 + 2);
+                    ctx.fillRect(Math.floor(tx), Math.floor(ty), 2, 3);
+                }
+                break;
         }
     }
     
@@ -1108,12 +1335,21 @@ class Particle {
     }
     
     render(ctx) {
-        // Enhanced particle rendering with glow effect
+        // Enhanced particle rendering with multiple layers and glow
         const pixelSize = Math.max(2, Math.floor(this.size));
         
-        // Outer glow
+        // Outer glow layer (largest)
         ctx.fillStyle = this.color;
-        ctx.globalAlpha = this.life * 0.3;
+        ctx.globalAlpha = this.life * 0.15;
+        ctx.fillRect(
+            Math.floor(this.x - pixelSize * 1.5),
+            Math.floor(this.y - pixelSize * 1.5),
+            pixelSize * 3,
+            pixelSize * 3
+        );
+        
+        // Middle glow layer
+        ctx.globalAlpha = this.life * 0.25;
         ctx.fillRect(
             Math.floor(this.x - pixelSize),
             Math.floor(this.y - pixelSize),
@@ -1121,8 +1357,8 @@ class Particle {
             pixelSize * 2
         );
         
-        // Main particle
-        ctx.globalAlpha = this.life;
+        // Main particle body
+        ctx.globalAlpha = this.life * 0.85;
         ctx.fillRect(
             Math.floor(this.x - pixelSize / 2),
             Math.floor(this.y - pixelSize / 2),
@@ -1130,9 +1366,9 @@ class Particle {
             pixelSize
         );
         
-        // Bright center
+        // Bright center core
         ctx.fillStyle = '#ffffff';
-        ctx.globalAlpha = this.life * 0.7;
+        ctx.globalAlpha = this.life * 0.9;
         const centerSize = Math.max(1, Math.floor(pixelSize / 2));
         ctx.fillRect(
             Math.floor(this.x - centerSize / 2),
@@ -1140,6 +1376,16 @@ class Particle {
             centerSize,
             centerSize
         );
+        
+        // Sparkle effect
+        if (this.life > 0.5) {
+            ctx.fillStyle = '#ffffff';
+            ctx.globalAlpha = (this.life - 0.5) * 2;
+            ctx.fillRect(Math.floor(this.x), Math.floor(this.y - pixelSize - 1), 1, 1);
+            ctx.fillRect(Math.floor(this.x - pixelSize - 1), Math.floor(this.y), 1, 1);
+            ctx.fillRect(Math.floor(this.x + pixelSize + 1), Math.floor(this.y), 1, 1);
+            ctx.fillRect(Math.floor(this.x), Math.floor(this.y + pixelSize + 1), 1, 1);
+        }
         
         ctx.globalAlpha = 1;
     }
@@ -1189,20 +1435,44 @@ class AmbientParticle {
     }
     
     render(ctx) {
-        // Pulsing opacity effect
+        // Enhanced pulsing opacity effect with smoother animation
         const pulse = Math.sin(Date.now() / 1000 * this.pulseSpeed + this.pulseOffset) * 0.5 + 0.5;
         const alpha = this.opacity * pulse;
         
         ctx.fillStyle = this.color;
-        ctx.globalAlpha = alpha;
+        ctx.globalAlpha = alpha * 0.4;
         
         const size = Math.floor(this.size);
+        
+        // Outer glow for ambient particles
+        ctx.fillRect(
+            Math.floor(this.x - size),
+            Math.floor(this.y - size),
+            size * 2,
+            size * 2
+        );
+        
+        // Main particle body
+        ctx.globalAlpha = alpha;
         ctx.fillRect(
             Math.floor(this.x - size / 2),
             Math.floor(this.y - size / 2),
             size,
             size
         );
+        
+        // Bright center for sparkle effect
+        if (pulse > 0.7) {
+            ctx.fillStyle = '#ffffff';
+            ctx.globalAlpha = (pulse - 0.7) * alpha;
+            const centerSize = Math.max(1, Math.floor(size / 2));
+            ctx.fillRect(
+                Math.floor(this.x - centerSize / 2),
+                Math.floor(this.y - centerSize / 2),
+                centerSize,
+                centerSize
+            );
+        }
         
         ctx.globalAlpha = 1;
     }

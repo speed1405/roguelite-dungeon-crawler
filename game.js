@@ -4,6 +4,7 @@ const GRID_WIDTH = 25;
 const GRID_HEIGHT = 18;
 const PIXEL_ART_OUTLINE_WIDTH = 2;
 const PIXEL_ART_BORDER_WIDTH = 1;
+const AMBIENT_PARTICLE_COUNT = 30;
 
 // Dungeon texture generation constants
 const HASH_MULTIPLIER_X = 73;
@@ -424,8 +425,7 @@ class Game {
     createAmbientParticles() {
         this.ambientParticles = [];
         // Create ambient particles based on biome
-        const particleCount = 30;
-        for (let i = 0; i < particleCount; i++) {
+        for (let i = 0; i < AMBIENT_PARTICLE_COUNT; i++) {
             this.ambientParticles.push(new AmbientParticle(
                 Math.random() * this.canvas.width,
                 Math.random() * this.canvas.height,
@@ -998,9 +998,9 @@ class Enemy {
     getDarkerShade(color) {
         // Simple function to darken a hex color
         const hex = color.replace('#', '');
-        const r = Math.max(0, parseInt(hex.substr(0, 2), 16) - 40);
-        const g = Math.max(0, parseInt(hex.substr(2, 2), 16) - 40);
-        const b = Math.max(0, parseInt(hex.substr(4, 2), 16) - 40);
+        const r = Math.max(0, parseInt(hex.substring(0, 2), 16) - 40);
+        const g = Math.max(0, parseInt(hex.substring(2, 4), 16) - 40);
+        const b = Math.max(0, parseInt(hex.substring(4, 6), 16) - 40);
         return `#${r.toString(16).padStart(2, '0')}${g.toString(16).padStart(2, '0')}${b.toString(16).padStart(2, '0')}`;
     }
 }

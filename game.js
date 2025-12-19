@@ -3,6 +3,12 @@ const TILE_SIZE = 32;
 const GRID_WIDTH = 25;
 const GRID_HEIGHT = 18;
 const PIXEL_ART_OUTLINE_WIDTH = 2;
+const PIXEL_ART_BORDER_WIDTH = 1;
+
+// Dungeon texture generation constants
+const HASH_MULTIPLIER_X = 73;
+const HASH_MULTIPLIER_Y = 131;
+const TEXTURE_FREQUENCY = 7;
 
 // Biome Definitions
 const BIOMES = {
@@ -503,8 +509,8 @@ class Game {
     }
     
     renderDungeon() {
-        // Set line width once for performance
-        this.ctx.lineWidth = 1;
+        // Set line width once for performance (used for wall borders)
+        this.ctx.lineWidth = PIXEL_ART_BORDER_WIDTH;
         
         for (let y = 0; y < GRID_HEIGHT; y++) {
             for (let x = 0; x < GRID_WIDTH; x++) {
@@ -537,8 +543,8 @@ class Game {
                     }
                     
                     // Add deterministic pixel details for variety (based on tile position)
-                    const seed = x * 73 + y * 131; // Simple hash from coordinates
-                    if (seed % 7 === 0) {
+                    const seed = x * HASH_MULTIPLIER_X + y * HASH_MULTIPLIER_Y;
+                    if (seed % TEXTURE_FREQUENCY === 0) {
                         this.ctx.fillStyle = this.currentBiome.decoration;
                         this.ctx.globalAlpha = 0.4;
                         const pixelX = px + ((seed * 3) % (TILE_SIZE - 4));

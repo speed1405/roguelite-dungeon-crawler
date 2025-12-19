@@ -737,7 +737,9 @@ class Game {
         document.getElementById('level-text').textContent = this.level;
         document.getElementById('biome-text').textContent = this.currentBiome.name;
         document.getElementById('score-text').textContent = this.score;
-        document.getElementById('class-text').textContent = this.selectedClass.name;
+        if (this.selectedClass) {
+            document.getElementById('class-text').textContent = this.selectedClass.name;
+        }
     }
     
     nextLevel() {

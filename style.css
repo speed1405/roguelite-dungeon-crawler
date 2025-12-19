@@ -27,6 +27,10 @@ body {
     background: #1a1a1a;
     border: 3px solid #e94560;
     border-radius: 5px;
+    image-rendering: -moz-crisp-edges;
+    image-rendering: -webkit-crisp-edges;
+    image-rendering: pixelated;
+    image-rendering: crisp-edges;
 }
 
 #ui {

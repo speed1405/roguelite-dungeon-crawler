@@ -4,6 +4,7 @@ const GRID_WIDTH = 25;
 const GRID_HEIGHT = 18;
 const PIXEL_ART_OUTLINE_WIDTH = 2;
 const PIXEL_ART_BORDER_WIDTH = 1;
+const AMBIENT_PARTICLE_COUNT = 30;
 
 // Dungeon texture generation constants
 const HASH_MULTIPLIER_X = 73;
@@ -240,6 +241,7 @@ class Game {
         this.player = null;
         this.enemies = [];
         this.particles = [];
+        this.ambientParticles = [];
         this.keys = {};
         this.lastTime = 0;
         this.gameOver = false;
@@ -279,6 +281,7 @@ class Game {
         this.generateDungeon();
         this.spawnPlayer();
         this.spawnEnemies();
+        this.createAmbientParticles();
         this.updateUI();
     }
     
@@ -419,6 +422,18 @@ class Game {
         return Math.abs(x - px) < 5 && Math.abs(y - py) < 5;
     }
     
+    createAmbientParticles() {
+        this.ambientParticles = [];
+        // Create ambient particles based on biome
+        for (let i = 0; i < AMBIENT_PARTICLE_COUNT; i++) {
+            this.ambientParticles.push(new AmbientParticle(
+                Math.random() * this.canvas.width,
+                Math.random() * this.canvas.height,
+                this.currentBiome
+            ));
+        }
+    }
+    
     update(deltaTime) {
         if (this.gameOver) return;
         
@@ -461,6 +476,11 @@ class Game {
             }
         }
         
+        // Update ambient particles
+        for (const particle of this.ambientParticles) {
+            particle.update(deltaTime, this.canvas);
+        }
+        
         // Check game over
         if (this.player.health <= 0) {
             this.endGame();
@@ -486,6 +506,9 @@ class Game {
         // Draw dungeon
         this.renderDungeon();
         
+        // Draw ambient particles (behind entities)
+        this.ambientParticles.forEach(p => p.render(this.ctx));
+        
         // Draw particles
         this.particles.forEach(p => p.render(this.ctx));
         
@@ -495,21 +518,50 @@ class Game {
         // Draw player
         this.player.render(this.ctx);
         
-        // Draw level clear message
+        // Draw enhanced level clear message
         if (this.enemies.length === 0 && !this.gameOver) {
-            this.ctx.fillStyle = 'rgba(0, 0, 0, 0.7)';
-            this.ctx.fillRect(200, 250, 400, 100);
-            this.ctx.fillStyle = '#33ff33';
-            this.ctx.font = 'bold 24px Arial';
+            // Background with border
+            this.ctx.fillStyle = 'rgba(0, 0, 0, 0.85)';
+            this.ctx.fillRect(180, 230, 440, 140);
+            
+            // Border glow effect
+            this.ctx.strokeStyle = '#33ff33';
+            this.ctx.lineWidth = 3;
+            this.ctx.strokeRect(180, 230, 440, 140);
+            
+            // Inner highlight
+            this.ctx.strokeStyle = 'rgba(51, 255, 51, 0.3)';
+            this.ctx.lineWidth = 6;
+            this.ctx.strokeRect(183, 233, 434, 134);
+            
+            // "Level Clear!" text with glow
+            this.ctx.font = 'bold 32px Arial';
             this.ctx.textAlign = 'center';
+            
+            // Text shadow/glow
+            this.ctx.fillStyle = 'rgba(51, 255, 51, 0.5)';
+            this.ctx.fillText('Level Clear!', 402, 292);
+            this.ctx.fillText('Level Clear!', 398, 288);
+            
+            // Main text
+            this.ctx.fillStyle = '#33ff33';
             this.ctx.fillText('Level Clear!', 400, 290);
+            
+            // Score display
+            this.ctx.font = 'bold 20px Arial';
+            this.ctx.fillStyle = '#ffff00';
+            this.ctx.fillText(`Score: ${this.score}`, 400, 325);
+            
+            // Instructions with pulsing effect
             this.ctx.font = '18px Arial';
-            this.ctx.fillText('Press Enter for Next Level', 400, 320);
+            const pulseAlpha = 0.5 + Math.sin(Date.now() / 300) * 0.5;
+            this.ctx.fillStyle = `rgba(255, 255, 255, ${pulseAlpha})`;
+            this.ctx.fillText('Press Enter for Next Level', 400, 355);
         }
     }
     
     renderDungeon() {
-        // Set line width once for performance (used for wall borders)
+        // Set line width once for performance
         this.ctx.lineWidth = PIXEL_ART_BORDER_WIDTH;
         
         for (let y = 0; y < GRID_HEIGHT; y++) {
@@ -518,39 +570,82 @@ class Game {
                 const py = y * TILE_SIZE;
                 
                 if (this.dungeon[y][x] === 1) {
-                    // Wall with pixel art style
+                    // Enhanced wall rendering with 3D depth effect
                     this.ctx.fillStyle = this.currentBiome.wall;
                     this.ctx.fillRect(px, py, TILE_SIZE, TILE_SIZE);
                     
-                    // Add pixel art border effect
-                    this.ctx.strokeStyle = 'rgba(0, 0, 0, 0.5)';
-                    this.ctx.strokeRect(px, py, TILE_SIZE, TILE_SIZE);
+                    // Top highlight for 3D effect
+                    this.ctx.fillStyle = 'rgba(255, 255, 255, 0.15)';
+                    this.ctx.fillRect(px, py, TILE_SIZE, 4);
+                    this.ctx.fillRect(px, py, 4, TILE_SIZE);
                     
-                    // Add highlight for depth
-                    this.ctx.fillStyle = 'rgba(255, 255, 255, 0.1)';
-                    this.ctx.fillRect(px, py, TILE_SIZE / 4, TILE_SIZE / 4);
+                    // Bottom/right shadow for depth
+                    this.ctx.fillStyle = 'rgba(0, 0, 0, 0.4)';
+                    this.ctx.fillRect(px, py + TILE_SIZE - 4, TILE_SIZE, 4);
+                    this.ctx.fillRect(px + TILE_SIZE - 4, py, 4, TILE_SIZE);
+                    
+                    // Add texture variation based on position
+                    const seed = (x * HASH_MULTIPLIER_X + y * HASH_MULTIPLIER_Y) % 100;
+                    if (seed < 30) {
+                        this.ctx.fillStyle = this.currentBiome.decoration;
+                        this.ctx.globalAlpha = 0.2;
+                        const brickX = px + (seed % 3) * 8;
+                        const brickY = py + (Math.floor(seed / 3) % 3) * 8;
+                        this.ctx.fillRect(brickX, brickY, 6, 6);
+                        this.ctx.globalAlpha = 1;
+                    }
+                    
+                    // Border for definition
+                    this.ctx.strokeStyle = 'rgba(0, 0, 0, 0.6)';
+                    this.ctx.strokeRect(px, py, TILE_SIZE, TILE_SIZE);
                 } else {
-                    // Floor with pixel art style
+                    // Enhanced floor rendering with varied texture
                     this.ctx.fillStyle = this.currentBiome.floor;
                     this.ctx.fillRect(px, py, TILE_SIZE, TILE_SIZE);
                     
-                    // Add pixel art texture pattern
+                    // Checkerboard pattern for subtle variation
                     if ((x + y) % 2 === 0) {
                         this.ctx.fillStyle = this.currentBiome.decoration;
-                        this.ctx.globalAlpha = 0.2;
+                        this.ctx.globalAlpha = 0.15;
                         this.ctx.fillRect(px, py, TILE_SIZE, TILE_SIZE);
                         this.ctx.globalAlpha = 1;
                     }
                     
-                    // Add deterministic pixel details for variety (based on tile position)
+                    // Add deterministic pixel details for variety
                     const seed = x * HASH_MULTIPLIER_X + y * HASH_MULTIPLIER_Y;
                     if (seed % TEXTURE_FREQUENCY === 0) {
                         this.ctx.fillStyle = this.currentBiome.decoration;
-                        this.ctx.globalAlpha = 0.4;
-                        const pixelX = px + ((seed * 3) % (TILE_SIZE - 4));
-                        const pixelY = py + ((seed * 5) % (TILE_SIZE - 4));
-                        this.ctx.fillRect(pixelX, pixelY, 4, 4);
+                        this.ctx.globalAlpha = 0.3;
+                        const pixelX = px + ((seed * 3) % (TILE_SIZE - 6)) + 2;
+                        const pixelY = py + ((seed * 5) % (TILE_SIZE - 6)) + 2;
+                        this.ctx.fillRect(pixelX, pixelY, 3, 3);
                         this.ctx.globalAlpha = 1;
+                    }
+                    
+                    // Random crack/detail variations
+                    if (seed % 13 === 0) {
+                        this.ctx.fillStyle = 'rgba(0, 0, 0, 0.2)';
+                        const crackX = px + ((seed * 7) % (TILE_SIZE - 8)) + 2;
+                        const crackY = py + ((seed * 11) % (TILE_SIZE - 4)) + 2;
+                        this.ctx.fillRect(crackX, crackY, 6, 2);
+                    }
+                    
+                    // Subtle ambient shadow near walls
+                    let shadowIntensity = 0;
+                    for (let dy = -1; dy <= 1; dy++) {
+                        for (let dx = -1; dx <= 1; dx++) {
+                            const nx = x + dx;
+                            const ny = y + dy;
+                            if (nx >= 0 && nx < GRID_WIDTH && ny >= 0 && ny < GRID_HEIGHT) {
+                                if (this.dungeon[ny][nx] === 1) {
+                                    shadowIntensity += 0.05;
+                                }
+                            }
+                        }
+                    }
+                    if (shadowIntensity > 0) {
+                        this.ctx.fillStyle = `rgba(0, 0, 0, ${Math.min(shadowIntensity, 0.3)})`;
+                        this.ctx.fillRect(px, py, TILE_SIZE, TILE_SIZE);
                     }
                 }
             }
@@ -570,6 +665,7 @@ class Game {
     nextLevel() {
         this.level++;
         this.particles = [];
+        this.ambientParticles = [];
         this.startNewLevel();
     }
     
@@ -585,6 +681,7 @@ class Game {
         this.score = 0;
         this.gameOver = false;
         this.particles = [];
+        this.ambientParticles = [];
         document.getElementById('game-over').classList.add('hidden');
         this.startNewLevel();
     }
@@ -694,72 +791,75 @@ class Player {
     }
     
     render(ctx) {
-        // Draw player with pixel art style
+        // Draw player with enhanced pixel art style
         const halfSize = Math.floor(this.size / 2);
+        const x = Math.floor(this.x - halfSize);
+        const y = Math.floor(this.y - halfSize);
         
-        // Main body (square with pixel art style)
+        // Shadow
+        ctx.fillStyle = 'rgba(0, 0, 0, 0.3)';
+        ctx.fillRect(x + 2, y + this.size - 2, this.size - 2, 4);
+        
+        // Main body with gradient effect
         ctx.fillStyle = this.color;
-        ctx.fillRect(
-            Math.floor(this.x - halfSize),
-            Math.floor(this.y - halfSize),
-            this.size,
-            this.size
-        );
+        ctx.fillRect(x, y, this.size, this.size);
         
-        // Add pixel art details - eyes
+        // Highlight (top-left)
+        ctx.fillStyle = '#6bc4ff';
+        ctx.fillRect(x, y, this.size / 2, 4);
+        ctx.fillRect(x, y, 4, this.size / 2);
+        
+        // Darker shade (bottom-right)
+        ctx.fillStyle = '#2d7db8';
+        ctx.fillRect(x + this.size / 2, y + this.size - 4, this.size / 2, 4);
+        ctx.fillRect(x + this.size - 4, y + this.size / 2, 4, this.size / 2);
+        
+        // Enhanced eyes with white background
         ctx.fillStyle = '#ffffff';
-        const eyeSize = 4;
-        const eyeOffset = 4;
-        ctx.fillRect(
-            Math.floor(this.x - eyeOffset),
-            Math.floor(this.y - eyeOffset),
-            eyeSize,
-            eyeSize
-        );
-        ctx.fillRect(
-            Math.floor(this.x + eyeOffset - eyeSize),
-            Math.floor(this.y - eyeOffset),
-            eyeSize,
-            eyeSize
-        );
+        const eyeSize = 6;
+        const eyeOffset = 5;
+        ctx.fillRect(Math.floor(this.x - eyeOffset - 1), Math.floor(this.y - eyeOffset), eyeSize, eyeSize);
+        ctx.fillRect(Math.floor(this.x + eyeOffset - eyeSize + 1), Math.floor(this.y - eyeOffset), eyeSize, eyeSize);
         
-        // Eye pupils
+        // Eye pupils with better positioning
+        ctx.fillStyle = '#0066cc';
+        const pupilSize = 3;
+        ctx.fillRect(Math.floor(this.x - eyeOffset), Math.floor(this.y - eyeOffset + 1), pupilSize, pupilSize);
+        ctx.fillRect(Math.floor(this.x + eyeOffset - pupilSize), Math.floor(this.y - eyeOffset + 1), pupilSize, pupilSize);
+        
+        // Add a smile/mouth
         ctx.fillStyle = '#000000';
-        const pupilSize = 2;
-        ctx.fillRect(
-            Math.floor(this.x - eyeOffset + 1),
-            Math.floor(this.y - eyeOffset + 1),
-            pupilSize,
-            pupilSize
-        );
-        ctx.fillRect(
-            Math.floor(this.x + eyeOffset - eyeSize + 1),
-            Math.floor(this.y - eyeOffset + 1),
-            pupilSize,
-            pupilSize
-        );
+        ctx.fillRect(Math.floor(this.x - 3), Math.floor(this.y + 4), 6, 2);
         
         // Outline with pixel art style
         ctx.strokeStyle = '#ffffff';
         ctx.lineWidth = PIXEL_ART_OUTLINE_WIDTH;
-        ctx.strokeRect(
-            Math.floor(this.x - halfSize),
-            Math.floor(this.y - halfSize),
-            this.size,
-            this.size
-        );
+        ctx.strokeRect(x, y, this.size, this.size);
         
-        // Draw attack indicator with pixel art style
+        // Inner dark outline for depth
+        ctx.strokeStyle = 'rgba(0, 0, 0, 0.3)';
+        ctx.lineWidth = 1;
+        ctx.strokeRect(x + 1, y + 1, this.size - 2, this.size - 2);
+        
+        // Draw enhanced attack indicator with slash effect
         if (this.isAttacking && this.attackCooldown > 0.3) {
-            ctx.strokeStyle = '#ffff00';
-            ctx.lineWidth = PIXEL_ART_OUTLINE_WIDTH;
-            const attackSize = Math.floor(this.attackRange);
-            ctx.strokeRect(
-                Math.floor(this.x - attackSize),
-                Math.floor(this.y - attackSize),
-                attackSize * 2,
-                attackSize * 2
-            );
+            const animProgress = (this.attackCooldown - 0.3) / 0.2;
+            
+            // Circular attack range indicator
+            ctx.strokeStyle = 'rgba(255, 255, 0, 0.4)';
+            ctx.lineWidth = 3;
+            ctx.beginPath();
+            ctx.arc(Math.floor(this.x), Math.floor(this.y), this.attackRange, 0, Math.PI * 2);
+            ctx.stroke();
+            
+            // Animated slash effect
+            ctx.strokeStyle = `rgba(255, 255, 100, ${animProgress})`;
+            ctx.lineWidth = 4;
+            ctx.beginPath();
+            const slashAngle = animProgress * Math.PI * 0.5;
+            const slashRadius = this.attackRange * 0.8;
+            ctx.arc(Math.floor(this.x), Math.floor(this.y), slashRadius, -Math.PI/4 + slashAngle, Math.PI/4 + slashAngle);
+            ctx.stroke();
         }
     }
 }
@@ -820,64 +920,88 @@ class Enemy {
     }
     
     render(ctx) {
-        // Draw enemy with pixel art style
+        // Draw enemy with enhanced pixel art style
         const halfSize = Math.floor(this.size / 2);
+        const x = Math.floor(this.x - halfSize);
+        const y = Math.floor(this.y - halfSize);
         
-        // Main body (square with pixel art style)
+        // Shadow
+        ctx.fillStyle = 'rgba(0, 0, 0, 0.3)';
+        ctx.fillRect(x + 2, y + this.size - 2, this.size - 2, 4);
+        
+        // Main body
         ctx.fillStyle = this.color;
-        ctx.fillRect(
-            Math.floor(this.x - halfSize),
-            Math.floor(this.y - halfSize),
-            this.size,
-            this.size
-        );
+        ctx.fillRect(x, y, this.size, this.size);
         
-        // Add pixel art details - simple eyes
-        ctx.fillStyle = '#ff0000';
-        const eyeSize = 3;
+        // Add shading for depth based on color
+        const darkerColor = this.getDarkerShade(this.color);
+        ctx.fillStyle = darkerColor;
+        ctx.fillRect(x + this.size / 2, y + this.size - 4, this.size / 2, 4);
+        ctx.fillRect(x + this.size - 4, y + this.size / 2, 4, this.size / 2);
+        
+        // Add highlight
+        ctx.fillStyle = 'rgba(255, 255, 255, 0.3)';
+        ctx.fillRect(x, y, this.size / 2, 3);
+        ctx.fillRect(x, y, 3, this.size / 2);
+        
+        // Enhanced eyes with glowing effect
+        const eyeSize = Math.max(3, Math.floor(this.size / 8));
         const eyeOffset = Math.floor(this.size / 4);
-        ctx.fillRect(
-            Math.floor(this.x - eyeOffset),
-            Math.floor(this.y - eyeOffset),
-            eyeSize,
-            eyeSize
-        );
-        ctx.fillRect(
-            Math.floor(this.x + eyeOffset - eyeSize),
-            Math.floor(this.y - eyeOffset),
-            eyeSize,
-            eyeSize
-        );
+        
+        // Eye glow
+        ctx.fillStyle = 'rgba(255, 0, 0, 0.3)';
+        ctx.fillRect(Math.floor(this.x - eyeOffset - 1), Math.floor(this.y - eyeOffset - 1), eyeSize + 2, eyeSize + 2);
+        ctx.fillRect(Math.floor(this.x + eyeOffset - eyeSize - 1), Math.floor(this.y - eyeOffset - 1), eyeSize + 2, eyeSize + 2);
+        
+        // Eyes
+        ctx.fillStyle = '#ff0000';
+        ctx.fillRect(Math.floor(this.x - eyeOffset), Math.floor(this.y - eyeOffset), eyeSize, eyeSize);
+        ctx.fillRect(Math.floor(this.x + eyeOffset - eyeSize), Math.floor(this.y - eyeOffset), eyeSize, eyeSize);
+        
+        // Eye highlights for menacing look
+        ctx.fillStyle = '#ff6666';
+        const highlightSize = Math.max(1, Math.floor(eyeSize / 2));
+        ctx.fillRect(Math.floor(this.x - eyeOffset), Math.floor(this.y - eyeOffset), highlightSize, highlightSize);
+        ctx.fillRect(Math.floor(this.x + eyeOffset - eyeSize), Math.floor(this.y - eyeOffset), highlightSize, highlightSize);
         
         // Outline with pixel art style
         ctx.strokeStyle = '#000000';
         ctx.lineWidth = PIXEL_ART_OUTLINE_WIDTH;
-        ctx.strokeRect(
-            Math.floor(this.x - halfSize),
-            Math.floor(this.y - halfSize),
-            this.size,
-            this.size
-        );
+        ctx.strokeRect(x, y, this.size, this.size);
         
-        // Draw health bar with pixel art style
-        const barWidth = this.size;
-        const barHeight = 4;
+        // Draw enhanced health bar with border
+        const barWidth = this.size + 4;
+        const barHeight = 5;
         const healthPercent = this.health / this.maxHealth;
         
-        ctx.fillStyle = '#ff0000';
-        ctx.fillRect(
-            Math.floor(this.x - barWidth / 2),
-            Math.floor(this.y - halfSize - 8),
-            barWidth,
-            barHeight
-        );
-        ctx.fillStyle = '#00ff00';
-        ctx.fillRect(
-            Math.floor(this.x - barWidth / 2),
-            Math.floor(this.y - halfSize - 8),
-            Math.floor(barWidth * healthPercent),
-            barHeight
-        );
+        // Health bar background/border
+        ctx.fillStyle = '#000000';
+        ctx.fillRect(Math.floor(this.x - barWidth / 2) - 1, Math.floor(this.y - halfSize - 10) - 1, barWidth + 2, barHeight + 2);
+        
+        // Health bar red background
+        ctx.fillStyle = '#660000';
+        ctx.fillRect(Math.floor(this.x - barWidth / 2), Math.floor(this.y - halfSize - 10), barWidth, barHeight);
+        
+        // Health bar green fill with gradient effect
+        const healthWidth = Math.floor(barWidth * healthPercent);
+        if (healthWidth > 0) {
+            // Green part
+            ctx.fillStyle = '#00ff00';
+            ctx.fillRect(Math.floor(this.x - barWidth / 2), Math.floor(this.y - halfSize - 10), healthWidth, barHeight);
+            
+            // Highlight on health bar
+            ctx.fillStyle = '#88ff88';
+            ctx.fillRect(Math.floor(this.x - barWidth / 2), Math.floor(this.y - halfSize - 10), healthWidth, 2);
+        }
+    }
+    
+    getDarkerShade(color) {
+        // Simple function to darken a hex color
+        const hex = color.replace('#', '');
+        const r = Math.max(0, parseInt(hex.substring(0, 2), 16) - 40);
+        const g = Math.max(0, parseInt(hex.substring(2, 4), 16) - 40);
+        const b = Math.max(0, parseInt(hex.substring(4, 6), 16) - 40);
+        return `#${r.toString(16).padStart(2, '0')}${g.toString(16).padStart(2, '0')}${b.toString(16).padStart(2, '0')}`;
     }
 }
 
@@ -901,16 +1025,102 @@ class Particle {
     }
     
     render(ctx) {
+        // Enhanced particle rendering with glow effect
+        const pixelSize = Math.max(2, Math.floor(this.size));
+        
+        // Outer glow
         ctx.fillStyle = this.color;
+        ctx.globalAlpha = this.life * 0.3;
+        ctx.fillRect(
+            Math.floor(this.x - pixelSize),
+            Math.floor(this.y - pixelSize),
+            pixelSize * 2,
+            pixelSize * 2
+        );
+        
+        // Main particle
         ctx.globalAlpha = this.life;
-        // Render as pixel art squares instead of circles
-        const pixelSize = Math.floor(this.size);
         ctx.fillRect(
             Math.floor(this.x - pixelSize / 2),
             Math.floor(this.y - pixelSize / 2),
             pixelSize,
             pixelSize
         );
+        
+        // Bright center
+        ctx.fillStyle = '#ffffff';
+        ctx.globalAlpha = this.life * 0.7;
+        const centerSize = Math.max(1, Math.floor(pixelSize / 2));
+        ctx.fillRect(
+            Math.floor(this.x - centerSize / 2),
+            Math.floor(this.y - centerSize / 2),
+            centerSize,
+            centerSize
+        );
+        
+        ctx.globalAlpha = 1;
+    }
+}
+
+// Ambient Particle Class for atmospheric effects
+class AmbientParticle {
+    constructor(x, y, biome) {
+        this.x = x;
+        this.y = y;
+        this.biome = biome;
+        this.size = Math.random() * 3 + 1;
+        this.speed = Math.random() * 10 + 5;
+        this.direction = Math.random() * Math.PI * 2;
+        this.opacity = Math.random() * 0.3 + 0.1;
+        this.pulseSpeed = Math.random() * 2 + 1;
+        this.pulseOffset = Math.random() * Math.PI * 2;
+        
+        // Set color based on biome
+        this.color = this.getBiomeParticleColor(biome.name);
+    }
+    
+    getBiomeParticleColor(biomeName) {
+        switch(biomeName) {
+            case 'Forest': return '#90ee90';
+            case 'Cave': return '#888888';
+            case 'Dungeon': return '#9999aa';
+            case 'Lava': return '#ff6600';
+            case 'Ice Cave': return '#aaddff';
+            case 'Swamp': return '#669966';
+            case 'Crypt': return '#8888bb';
+            case 'The Void': return '#9966cc';
+            default: return '#ffffff';
+        }
+    }
+    
+    update(deltaTime, canvas) {
+        // Floating movement
+        this.x += Math.cos(this.direction) * this.speed * deltaTime;
+        this.y += Math.sin(this.direction) * this.speed * deltaTime;
+        
+        // Wrap around screen
+        if (this.x < -10) this.x = canvas.width + 10;
+        if (this.x > canvas.width + 10) this.x = -10;
+        if (this.y < -10) this.y = canvas.height + 10;
+        if (this.y > canvas.height + 10) this.y = -10;
+    }
+    
+    render(ctx) {
+        // Pulsing opacity effect
+        const pulse = Math.sin(Date.now() / 1000 * this.pulseSpeed + this.pulseOffset) * 0.5 + 0.5;
+        const alpha = this.opacity * pulse;
+        
+        ctx.fillStyle = this.color;
+        ctx.globalAlpha = alpha;
+        
+        const size = Math.floor(this.size);
+        ctx.fillRect(
+            Math.floor(this.x - size / 2),
+            Math.floor(this.y - size / 2),
+            size,
+            size
+        );
+        
         ctx.globalAlpha = 1;
     }
 }

@@ -2,6 +2,7 @@
 const TILE_SIZE = 32;
 const GRID_WIDTH = 25;
 const GRID_HEIGHT = 18;
+const PIXEL_ART_OUTLINE_WIDTH = 2;
 
 // Biome Definitions
 const BIOMES = {
@@ -502,6 +503,9 @@ class Game {
     }
     
     renderDungeon() {
+        // Set line width once for performance
+        this.ctx.lineWidth = 1;
+        
         for (let y = 0; y < GRID_HEIGHT; y++) {
             for (let x = 0; x < GRID_WIDTH; x++) {
                 const px = x * TILE_SIZE;
@@ -514,7 +518,6 @@ class Game {
                     
                     // Add pixel art border effect
                     this.ctx.strokeStyle = 'rgba(0, 0, 0, 0.5)';
-                    this.ctx.lineWidth = 1;
                     this.ctx.strokeRect(px, py, TILE_SIZE, TILE_SIZE);
                     
                     // Add highlight for depth
@@ -533,12 +536,13 @@ class Game {
                         this.ctx.globalAlpha = 1;
                     }
                     
-                    // Add random pixel details for variety
-                    if (Math.random() < 0.15) {
+                    // Add deterministic pixel details for variety (based on tile position)
+                    const seed = x * 73 + y * 131; // Simple hash from coordinates
+                    if (seed % 7 === 0) {
                         this.ctx.fillStyle = this.currentBiome.decoration;
                         this.ctx.globalAlpha = 0.4;
-                        const pixelX = px + Math.floor(Math.random() * (TILE_SIZE - 4));
-                        const pixelY = py + Math.floor(Math.random() * (TILE_SIZE - 4));
+                        const pixelX = px + ((seed * 3) % (TILE_SIZE - 4));
+                        const pixelY = py + ((seed * 5) % (TILE_SIZE - 4));
                         this.ctx.fillRect(pixelX, pixelY, 4, 4);
                         this.ctx.globalAlpha = 1;
                     }
@@ -731,7 +735,7 @@ class Player {
         
         // Outline with pixel art style
         ctx.strokeStyle = '#ffffff';
-        ctx.lineWidth = 2;
+        ctx.lineWidth = PIXEL_ART_OUTLINE_WIDTH;
         ctx.strokeRect(
             Math.floor(this.x - halfSize),
             Math.floor(this.y - halfSize),
@@ -742,7 +746,7 @@ class Player {
         // Draw attack indicator with pixel art style
         if (this.isAttacking && this.attackCooldown > 0.3) {
             ctx.strokeStyle = '#ffff00';
-            ctx.lineWidth = 2;
+            ctx.lineWidth = PIXEL_ART_OUTLINE_WIDTH;
             const attackSize = Math.floor(this.attackRange);
             ctx.strokeRect(
                 Math.floor(this.x - attackSize),
@@ -841,7 +845,7 @@ class Enemy {
         
         // Outline with pixel art style
         ctx.strokeStyle = '#000000';
-        ctx.lineWidth = 2;
+        ctx.lineWidth = PIXEL_ART_OUTLINE_WIDTH;
         ctx.strokeRect(
             Math.floor(this.x - halfSize),
             Math.floor(this.y - halfSize),

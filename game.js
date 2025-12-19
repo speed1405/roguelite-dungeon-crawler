@@ -224,6 +224,8 @@ class Game {
     constructor() {
         this.canvas = document.getElementById('gameCanvas');
         this.ctx = this.canvas.getContext('2d');
+        // Disable anti-aliasing for pixel art
+        this.ctx.imageSmoothingEnabled = false;
         this.level = 1;
         this.score = 0;
         this.currentBiome = null;
@@ -506,21 +508,38 @@ class Game {
                 const py = y * TILE_SIZE;
                 
                 if (this.dungeon[y][x] === 1) {
-                    // Wall
+                    // Wall with pixel art style
                     this.ctx.fillStyle = this.currentBiome.wall;
                     this.ctx.fillRect(px, py, TILE_SIZE, TILE_SIZE);
-                    this.ctx.strokeStyle = 'rgba(0, 0, 0, 0.3)';
+                    
+                    // Add pixel art border effect
+                    this.ctx.strokeStyle = 'rgba(0, 0, 0, 0.5)';
+                    this.ctx.lineWidth = 1;
                     this.ctx.strokeRect(px, py, TILE_SIZE, TILE_SIZE);
+                    
+                    // Add highlight for depth
+                    this.ctx.fillStyle = 'rgba(255, 255, 255, 0.1)';
+                    this.ctx.fillRect(px, py, TILE_SIZE / 4, TILE_SIZE / 4);
                 } else {
-                    // Floor
+                    // Floor with pixel art style
                     this.ctx.fillStyle = this.currentBiome.floor;
                     this.ctx.fillRect(px, py, TILE_SIZE, TILE_SIZE);
                     
-                    // Add some visual variety
-                    if (Math.random() < 0.1) {
+                    // Add pixel art texture pattern
+                    if ((x + y) % 2 === 0) {
                         this.ctx.fillStyle = this.currentBiome.decoration;
-                        this.ctx.globalAlpha = 0.3;
+                        this.ctx.globalAlpha = 0.2;
                         this.ctx.fillRect(px, py, TILE_SIZE, TILE_SIZE);
+                        this.ctx.globalAlpha = 1;
+                    }
+                    
+                    // Add random pixel details for variety
+                    if (Math.random() < 0.15) {
+                        this.ctx.fillStyle = this.currentBiome.decoration;
+                        this.ctx.globalAlpha = 0.4;
+                        const pixelX = px + Math.floor(Math.random() * (TILE_SIZE - 4));
+                        const pixelY = py + Math.floor(Math.random() * (TILE_SIZE - 4));
+                        this.ctx.fillRect(pixelX, pixelY, 4, 4);
                         this.ctx.globalAlpha = 1;
                     }
                 }
@@ -665,24 +684,72 @@ class Player {
     }
     
     render(ctx) {
-        // Draw player
-        ctx.fillStyle = this.color;
-        ctx.beginPath();
-        ctx.arc(this.x, this.y, this.size / 2, 0, Math.PI * 2);
-        ctx.fill();
+        // Draw player with pixel art style
+        const halfSize = Math.floor(this.size / 2);
         
-        // Draw outline
+        // Main body (square with pixel art style)
+        ctx.fillStyle = this.color;
+        ctx.fillRect(
+            Math.floor(this.x - halfSize),
+            Math.floor(this.y - halfSize),
+            this.size,
+            this.size
+        );
+        
+        // Add pixel art details - eyes
+        ctx.fillStyle = '#ffffff';
+        const eyeSize = 4;
+        const eyeOffset = 4;
+        ctx.fillRect(
+            Math.floor(this.x - eyeOffset),
+            Math.floor(this.y - eyeOffset),
+            eyeSize,
+            eyeSize
+        );
+        ctx.fillRect(
+            Math.floor(this.x + eyeOffset - eyeSize),
+            Math.floor(this.y - eyeOffset),
+            eyeSize,
+            eyeSize
+        );
+        
+        // Eye pupils
+        ctx.fillStyle = '#000000';
+        const pupilSize = 2;
+        ctx.fillRect(
+            Math.floor(this.x - eyeOffset + 1),
+            Math.floor(this.y - eyeOffset + 1),
+            pupilSize,
+            pupilSize
+        );
+        ctx.fillRect(
+            Math.floor(this.x + eyeOffset - eyeSize + 1),
+            Math.floor(this.y - eyeOffset + 1),
+            pupilSize,
+            pupilSize
+        );
+        
+        // Outline with pixel art style
         ctx.strokeStyle = '#ffffff';
         ctx.lineWidth = 2;
-        ctx.stroke();
+        ctx.strokeRect(
+            Math.floor(this.x - halfSize),
+            Math.floor(this.y - halfSize),
+            this.size,
+            this.size
+        );
         
-        // Draw attack indicator
+        // Draw attack indicator with pixel art style
         if (this.isAttacking && this.attackCooldown > 0.3) {
             ctx.strokeStyle = '#ffff00';
-            ctx.lineWidth = 3;
-            ctx.beginPath();
-            ctx.arc(this.x, this.y, this.attackRange, 0, Math.PI * 2);
-            ctx.stroke();
+            ctx.lineWidth = 2;
+            const attackSize = Math.floor(this.attackRange);
+            ctx.strokeRect(
+                Math.floor(this.x - attackSize),
+                Math.floor(this.y - attackSize),
+                attackSize * 2,
+                attackSize * 2
+            );
         }
     }
 }
@@ -743,26 +810,64 @@ class Enemy {
     }
     
     render(ctx) {
-        // Draw enemy
-        ctx.fillStyle = this.color;
-        ctx.beginPath();
-        ctx.arc(this.x, this.y, this.size / 2, 0, Math.PI * 2);
-        ctx.fill();
+        // Draw enemy with pixel art style
+        const halfSize = Math.floor(this.size / 2);
         
-        // Draw outline
+        // Main body (square with pixel art style)
+        ctx.fillStyle = this.color;
+        ctx.fillRect(
+            Math.floor(this.x - halfSize),
+            Math.floor(this.y - halfSize),
+            this.size,
+            this.size
+        );
+        
+        // Add pixel art details - simple eyes
+        ctx.fillStyle = '#ff0000';
+        const eyeSize = 3;
+        const eyeOffset = Math.floor(this.size / 4);
+        ctx.fillRect(
+            Math.floor(this.x - eyeOffset),
+            Math.floor(this.y - eyeOffset),
+            eyeSize,
+            eyeSize
+        );
+        ctx.fillRect(
+            Math.floor(this.x + eyeOffset - eyeSize),
+            Math.floor(this.y - eyeOffset),
+            eyeSize,
+            eyeSize
+        );
+        
+        // Outline with pixel art style
         ctx.strokeStyle = '#000000';
         ctx.lineWidth = 2;
-        ctx.stroke();
+        ctx.strokeRect(
+            Math.floor(this.x - halfSize),
+            Math.floor(this.y - halfSize),
+            this.size,
+            this.size
+        );
         
-        // Draw health bar
+        // Draw health bar with pixel art style
         const barWidth = this.size;
         const barHeight = 4;
         const healthPercent = this.health / this.maxHealth;
         
         ctx.fillStyle = '#ff0000';
-        ctx.fillRect(this.x - barWidth / 2, this.y - this.size / 2 - 8, barWidth, barHeight);
+        ctx.fillRect(
+            Math.floor(this.x - barWidth / 2),
+            Math.floor(this.y - halfSize - 8),
+            barWidth,
+            barHeight
+        );
         ctx.fillStyle = '#00ff00';
-        ctx.fillRect(this.x - barWidth / 2, this.y - this.size / 2 - 8, barWidth * healthPercent, barHeight);
+        ctx.fillRect(
+            Math.floor(this.x - barWidth / 2),
+            Math.floor(this.y - halfSize - 8),
+            Math.floor(barWidth * healthPercent),
+            barHeight
+        );
     }
 }
 
@@ -788,9 +893,14 @@ class Particle {
     render(ctx) {
         ctx.fillStyle = this.color;
         ctx.globalAlpha = this.life;
-        ctx.beginPath();
-        ctx.arc(this.x, this.y, this.size, 0, Math.PI * 2);
-        ctx.fill();
+        // Render as pixel art squares instead of circles
+        const pixelSize = Math.floor(this.size);
+        ctx.fillRect(
+            Math.floor(this.x - pixelSize / 2),
+            Math.floor(this.y - pixelSize / 2),
+            pixelSize,
+            pixelSize
+        );
         ctx.globalAlpha = 1;
     }
 }

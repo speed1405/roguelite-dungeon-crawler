@@ -240,6 +240,7 @@ class Game {
         this.player = null;
         this.enemies = [];
         this.particles = [];
+        this.ambientParticles = [];
         this.keys = {};
         this.lastTime = 0;
         this.gameOver = false;
@@ -279,6 +280,7 @@ class Game {
         this.generateDungeon();
         this.spawnPlayer();
         this.spawnEnemies();
+        this.createAmbientParticles();
         this.updateUI();
     }
     
@@ -419,6 +421,19 @@ class Game {
         return Math.abs(x - px) < 5 && Math.abs(y - py) < 5;
     }
     
+    createAmbientParticles() {
+        this.ambientParticles = [];
+        // Create ambient particles based on biome
+        const particleCount = 30;
+        for (let i = 0; i < particleCount; i++) {
+            this.ambientParticles.push(new AmbientParticle(
+                Math.random() * this.canvas.width,
+                Math.random() * this.canvas.height,
+                this.currentBiome
+            ));
+        }
+    }
+    
     update(deltaTime) {
         if (this.gameOver) return;
         
@@ -461,6 +476,11 @@ class Game {
             }
         }
         
+        // Update ambient particles
+        for (const particle of this.ambientParticles) {
+            particle.update(deltaTime, this.canvas);
+        }
+        
         // Check game over
         if (this.player.health <= 0) {
             this.endGame();
@@ -485,6 +505,9 @@ class Game {
         
         // Draw dungeon
         this.renderDungeon();
+        
+        // Draw ambient particles (behind entities)
+        this.ambientParticles.forEach(p => p.render(this.ctx));
         
         // Draw particles
         this.particles.forEach(p => p.render(this.ctx));
@@ -642,6 +665,7 @@ class Game {
     nextLevel() {
         this.level++;
         this.particles = [];
+        this.ambientParticles = [];
         this.startNewLevel();
     }
     
@@ -657,6 +681,7 @@ class Game {
         this.score = 0;
         this.gameOver = false;
         this.particles = [];
+        this.ambientParticles = [];
         document.getElementById('game-over').classList.add('hidden');
         this.startNewLevel();
     }
@@ -1031,6 +1056,69 @@ class Particle {
             Math.floor(this.y - centerSize / 2),
             centerSize,
             centerSize
+        );
+        
+        ctx.globalAlpha = 1;
+    }
+}
+
+// Ambient Particle Class for atmospheric effects
+class AmbientParticle {
+    constructor(x, y, biome) {
+        this.x = x;
+        this.y = y;
+        this.biome = biome;
+        this.size = Math.random() * 3 + 1;
+        this.speed = Math.random() * 10 + 5;
+        this.direction = Math.random() * Math.PI * 2;
+        this.opacity = Math.random() * 0.3 + 0.1;
+        this.pulseSpeed = Math.random() * 2 + 1;
+        this.pulseOffset = Math.random() * Math.PI * 2;
+        
+        // Set color based on biome
+        this.color = this.getBiomeParticleColor(biome.name);
+    }
+    
+    getBiomeParticleColor(biomeName) {
+        switch(biomeName) {
+            case 'Forest': return '#90ee90';
+            case 'Cave': return '#888888';
+            case 'Dungeon': return '#9999aa';
+            case 'Lava': return '#ff6600';
+            case 'Ice Cave': return '#aaddff';
+            case 'Swamp': return '#669966';
+            case 'Crypt': return '#8888bb';
+            case 'The Void': return '#9966cc';
+            default: return '#ffffff';
+        }
+    }
+    
+    update(deltaTime, canvas) {
+        // Floating movement
+        this.x += Math.cos(this.direction) * this.speed * deltaTime;
+        this.y += Math.sin(this.direction) * this.speed * deltaTime;
+        
+        // Wrap around screen
+        if (this.x < -10) this.x = canvas.width + 10;
+        if (this.x > canvas.width + 10) this.x = -10;
+        if (this.y < -10) this.y = canvas.height + 10;
+        if (this.y > canvas.height + 10) this.y = -10;
+    }
+    
+    render(ctx) {
+        // Pulsing opacity effect
+        const pulse = Math.sin(Date.now() / 1000 * this.pulseSpeed + this.pulseOffset) * 0.5 + 0.5;
+        const alpha = this.opacity * pulse;
+        
+        ctx.fillStyle = this.color;
+        ctx.globalAlpha = alpha;
+        
+        const size = Math.floor(this.size);
+        ctx.fillRect(
+            Math.floor(this.x - size / 2),
+            Math.floor(this.y - size / 2),
+            size,
+            size
         );
         
         ctx.globalAlpha = 1;

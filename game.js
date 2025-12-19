@@ -730,6 +730,8 @@ class Game {
     }
     
     updateUI() {
+        if (!this.player || !this.currentBiome || !this.selectedClass) return;
+        
         const healthPercent = (this.player.health / this.player.maxHealth) * 100;
         document.getElementById('health-fill').style.width = healthPercent + '%';
         document.getElementById('health-text').textContent = 
@@ -737,9 +739,7 @@ class Game {
         document.getElementById('level-text').textContent = this.level;
         document.getElementById('biome-text').textContent = this.currentBiome.name;
         document.getElementById('score-text').textContent = this.score;
-        if (this.selectedClass) {
-            document.getElementById('class-text').textContent = this.selectedClass.name;
-        }
+        document.getElementById('class-text').textContent = this.selectedClass.name;
     }
     
     nextLevel() {

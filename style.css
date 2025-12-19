@@ -6,20 +6,39 @@
 
 body {
     font-family: 'Arial', sans-serif;
-    background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%);
+    background: linear-gradient(135deg, #0a0a1a 0%, #1a1a2e 25%, #16213e 75%, #0f3460 100%);
     display: flex;
     justify-content: center;
     align-items: center;
     min-height: 100vh;
     color: #eee;
+    position: relative;
+    overflow: hidden;
+}
+
+body::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: 
+        radial-gradient(circle at 20% 50%, rgba(233, 69, 96, 0.1) 0%, transparent 50%),
+        radial-gradient(circle at 80% 80%, rgba(15, 52, 96, 0.2) 0%, transparent 50%);
+    pointer-events: none;
 }
 
 #game-container {
     position: relative;
-    background: #0f3460;
+    background: linear-gradient(135deg, #0f3460 0%, #1a4d7a 100%);
     border-radius: 10px;
     padding: 20px;
-    box-shadow: 0 10px 40px rgba(0, 0, 0, 0.5);
+    box-shadow: 
+        0 10px 40px rgba(0, 0, 0, 0.5),
+        0 0 60px rgba(233, 69, 96, 0.2),
+        inset 0 1px 0 rgba(255, 255, 255, 0.1);
+    z-index: 1;
 }
 
 #gameCanvas {
@@ -31,6 +50,9 @@ body {
     image-rendering: -webkit-crisp-edges;
     image-rendering: pixelated;
     image-rendering: crisp-edges;
+    box-shadow: 
+        0 0 20px rgba(233, 69, 96, 0.3),
+        inset 0 0 10px rgba(0, 0, 0, 0.5);
 }
 
 #ui {
@@ -41,9 +63,11 @@ body {
     display: flex;
     gap: 20px;
     flex-wrap: wrap;
-    background: rgba(0, 0, 0, 0.3);
+    background: linear-gradient(135deg, rgba(0, 0, 0, 0.4) 0%, rgba(0, 0, 0, 0.2) 100%);
     padding: 10px 15px;
     border-radius: 5px;
+    border: 1px solid rgba(233, 69, 96, 0.3);
+    box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.05);
 }
 
 .stat-item {
@@ -55,6 +79,7 @@ body {
 .label {
     font-weight: bold;
     color: #e94560;
+    text-shadow: 0 0 10px rgba(233, 69, 96, 0.5);
 }
 
 .health-bar {
@@ -64,13 +89,28 @@ body {
     border: 2px solid #666;
     border-radius: 10px;
     overflow: hidden;
+    box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.5);
 }
 
 .health-fill {
     height: 100%;
-    background: linear-gradient(90deg, #e94560 0%, #ff6b6b 100%);
+    background: linear-gradient(90deg, #e94560 0%, #ff6b6b 50%, #ff8888 100%);
     transition: width 0.3s ease;
     width: 100%;
+    box-shadow: 
+        inset 0 2px 4px rgba(255, 255, 255, 0.3),
+        0 0 10px rgba(233, 69, 96, 0.5);
+    position: relative;
+}
+
+.health-fill::after {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 40%;
+    background: linear-gradient(to bottom, rgba(255, 255, 255, 0.3), transparent);
 }
 
 #health-text,
@@ -79,6 +119,7 @@ body {
 #score-text {
     font-weight: bold;
     color: #fff;
+    text-shadow: 0 0 5px rgba(255, 255, 255, 0.3);
 }
 
 #game-over {
@@ -86,12 +127,15 @@ body {
     top: 50%;
     left: 50%;
     transform: translate(-50%, -50%);
-    background: rgba(0, 0, 0, 0.95);
+    background: linear-gradient(135deg, rgba(0, 0, 0, 0.95) 0%, rgba(20, 20, 30, 0.95) 100%);
     padding: 40px;
     border-radius: 10px;
     text-align: center;
     border: 3px solid #e94560;
     z-index: 10;
+    box-shadow: 
+        0 0 30px rgba(233, 69, 96, 0.5),
+        inset 0 1px 0 rgba(255, 255, 255, 0.1);
 }
 
 #game-over.hidden {
@@ -102,6 +146,7 @@ body {
     color: #e94560;
     font-size: 36px;
     margin-bottom: 20px;
+    text-shadow: 0 0 20px rgba(233, 69, 96, 0.8);
 }
 
 #game-over p {
@@ -113,29 +158,38 @@ body {
     margin-top: 20px;
     padding: 12px 30px;
     font-size: 18px;
-    background: #e94560;
+    background: linear-gradient(135deg, #e94560 0%, #ff6b6b 100%);
     color: white;
     border: none;
     border-radius: 5px;
     cursor: pointer;
     transition: all 0.3s ease;
+    box-shadow: 
+        0 4px 15px rgba(233, 69, 96, 0.4),
+        inset 0 1px 0 rgba(255, 255, 255, 0.2);
+    font-weight: bold;
 }
 
 #restart-btn:hover {
-    background: #ff6b6b;
+    background: linear-gradient(135deg, #ff6b6b 0%, #ff8888 100%);
     transform: scale(1.05);
+    box-shadow: 
+        0 6px 20px rgba(233, 69, 96, 0.6),
+        inset 0 1px 0 rgba(255, 255, 255, 0.3);
 }
 
 #instructions {
     margin-top: 15px;
-    background: rgba(0, 0, 0, 0.3);
+    background: linear-gradient(135deg, rgba(0, 0, 0, 0.4) 0%, rgba(0, 0, 0, 0.2) 100%);
     padding: 15px;
     border-radius: 5px;
+    border: 1px solid rgba(233, 69, 96, 0.3);
 }
 
 #instructions h3 {
     color: #e94560;
     margin-bottom: 10px;
+    text-shadow: 0 0 10px rgba(233, 69, 96, 0.5);
 }
 
 #instructions p {

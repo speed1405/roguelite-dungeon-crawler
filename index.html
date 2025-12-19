@@ -11,6 +11,10 @@
         <div id="ui">
             <div id="stats">
                 <div class="stat-item">
+                    <span class="label">Class:</span>
+                    <span id="class-text">-</span>
+                </div>
+                <div class="stat-item">
                     <span class="label">Health:</span>
                     <div class="health-bar">
                         <div id="health-fill" class="health-fill"></div>
@@ -32,6 +36,55 @@
             </div>
         </div>
         <canvas id="gameCanvas" width="800" height="600"></canvas>
+        <div id="class-selection" class="modal">
+            <h2>Choose Your Character Class</h2>
+            <div class="class-grid">
+                <div class="class-option" data-class="WARRIOR">
+                    <div class="class-icon" style="background-color: #ff6b4d;"></div>
+                    <h3>Warrior</h3>
+                    <p class="class-description">High health and defense, balanced damage</p>
+                    <div class="class-stats">
+                        <div class="stat">HP: 150</div>
+                        <div class="stat">DMG: 20</div>
+                        <div class="stat">SPD: 100</div>
+                        <div class="stat">RNG: 45</div>
+                    </div>
+                </div>
+                <div class="class-option" data-class="MAGE">
+                    <div class="class-icon" style="background-color: #9b59b6;"></div>
+                    <h3>Mage</h3>
+                    <p class="class-description">High damage, low health, long range</p>
+                    <div class="class-stats">
+                        <div class="stat">HP: 70</div>
+                        <div class="stat">DMG: 40</div>
+                        <div class="stat">SPD: 90</div>
+                        <div class="stat">RNG: 80</div>
+                    </div>
+                </div>
+                <div class="class-option" data-class="ROGUE">
+                    <div class="class-icon" style="background-color: #2ecc71;"></div>
+                    <h3>Rogue</h3>
+                    <p class="class-description">Fast movement and attacks, moderate stats</p>
+                    <div class="class-stats">
+                        <div class="stat">HP: 90</div>
+                        <div class="stat">DMG: 30</div>
+                        <div class="stat">SPD: 150</div>
+                        <div class="stat">RNG: 40</div>
+                    </div>
+                </div>
+                <div class="class-option" data-class="PALADIN">
+                    <div class="class-icon" style="background-color: #f1c40f;"></div>
+                    <h3>Paladin</h3>
+                    <p class="class-description">Very high health, slower but powerful</p>
+                    <div class="class-stats">
+                        <div class="stat">HP: 180</div>
+                        <div class="stat">DMG: 25</div>
+                        <div class="stat">SPD: 80</div>
+                        <div class="stat">RNG: 50</div>
+                    </div>
+                </div>
+            </div>
+        </div>
         <div id="game-over" class="hidden">
             <h2>Game Over!</h2>
             <p>Final Score: <span id="final-score">0</span></p>

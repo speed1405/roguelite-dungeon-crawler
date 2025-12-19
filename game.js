@@ -71,6 +71,50 @@ const BIOMES = {
     }
 };
 
+// Character Class Definitions
+const CHARACTER_CLASSES = {
+    WARRIOR: {
+        name: 'Warrior',
+        description: 'High health and defense, balanced damage',
+        color: '#ff6b4d',
+        maxHealth: 150,
+        damage: 20,
+        speed: 100,
+        attackRange: 45,
+        attackCooldown: 0.6
+    },
+    MAGE: {
+        name: 'Mage',
+        description: 'High damage, low health, long range',
+        color: '#9b59b6',
+        maxHealth: 70,
+        damage: 40,
+        speed: 90,
+        attackRange: 80,
+        attackCooldown: 0.8
+    },
+    ROGUE: {
+        name: 'Rogue',
+        description: 'Fast movement and attacks, moderate stats',
+        color: '#2ecc71',
+        maxHealth: 90,
+        damage: 30,
+        speed: 150,
+        attackRange: 40,
+        attackCooldown: 0.3
+    },
+    PALADIN: {
+        name: 'Paladin',
+        description: 'Very high health, slower but powerful',
+        color: '#f1c40f',
+        maxHealth: 180,
+        damage: 25,
+        speed: 80,
+        attackRange: 50,
+        attackCooldown: 0.7
+    }
+};
+
 // Enemy Definitions
 const ENEMY_TYPES = {
     Slime: {
@@ -239,20 +283,33 @@ class Game {
         this.currentBiome = null;
         this.dungeon = [];
         this.player = null;
+        this.selectedClass = null;
         this.enemies = [];
         this.particles = [];
         this.ambientParticles = [];
         this.keys = {};
         this.lastTime = 0;
         this.gameOver = false;
+        this.gameStarted = false;
         
         this.init();
     }
     
     init() {
         this.setupEventListeners();
-        this.startNewLevel();
+        this.showClassSelection();
         this.gameLoop(0);
+    }
+    
+    showClassSelection() {
+        document.getElementById('class-selection').classList.remove('hidden');
+    }
+    
+    startGame(classKey) {
+        this.selectedClass = CHARACTER_CLASSES[classKey];
+        this.gameStarted = true;
+        document.getElementById('class-selection').classList.add('hidden');
+        this.startNewLevel();
     }
     
     setupEventListeners() {
@@ -260,9 +317,11 @@ class Game {
             this.keys[e.key.toLowerCase()] = true;
             if (e.key === ' ') {
                 e.preventDefault();
-                this.player.attack();
+                if (this.player) {
+                    this.player.attack();
+                }
             }
-            if (e.key === 'Enter' && this.enemies.length === 0 && !this.gameOver) {
+            if (e.key === 'Enter' && this.enemies.length === 0 && !this.gameOver && this.gameStarted) {
                 this.nextLevel();
             }
         });
@@ -273,6 +332,14 @@ class Game {
         
         document.getElementById('restart-btn').addEventListener('click', () => {
             this.restart();
+        });
+        
+        // Class selection event listeners
+        document.querySelectorAll('.class-option').forEach(btn => {
+            btn.addEventListener('click', (e) => {
+                const classKey = e.currentTarget.dataset.class;
+                this.startGame(classKey);
+            });
         });
     }
     
@@ -381,8 +448,11 @@ class Game {
         for (let y = 1; y < GRID_HEIGHT - 1; y++) {
             for (let x = 1; x < GRID_WIDTH - 1; x++) {
                 if (this.dungeon[y][x] === 0) {
-                    this.player = new Player(x * TILE_SIZE + TILE_SIZE / 2, 
-                                            y * TILE_SIZE + TILE_SIZE / 2);
+                    this.player = new Player(
+                        x * TILE_SIZE + TILE_SIZE / 2, 
+                        y * TILE_SIZE + TILE_SIZE / 2,
+                        this.selectedClass
+                    );
                     return;
                 }
             }
@@ -435,7 +505,7 @@ class Game {
     }
     
     update(deltaTime) {
-        if (this.gameOver) return;
+        if (this.gameOver || !this.gameStarted) return;
         
         // Update player
         this.player.update(this.keys, this.dungeon, deltaTime);
@@ -502,6 +572,13 @@ class Game {
     
     render() {
         this.ctx.clearRect(0, 0, this.canvas.width, this.canvas.height);
+        
+        if (!this.gameStarted) {
+            // Draw a background when game hasn't started
+            this.ctx.fillStyle = '#1a1a1a';
+            this.ctx.fillRect(0, 0, this.canvas.width, this.canvas.height);
+            return;
+        }
         
         // Draw dungeon
         this.renderDungeon();
@@ -660,6 +737,7 @@ class Game {
         document.getElementById('level-text').textContent = this.level;
         document.getElementById('biome-text').textContent = this.currentBiome.name;
         document.getElementById('score-text').textContent = this.score;
+        document.getElementById('class-text').textContent = this.selectedClass.name;
     }
     
     nextLevel() {
@@ -680,10 +758,12 @@ class Game {
         this.level = 1;
         this.score = 0;
         this.gameOver = false;
+        this.gameStarted = false;
+        this.selectedClass = null;
         this.particles = [];
         this.ambientParticles = [];
         document.getElementById('game-over').classList.add('hidden');
-        this.startNewLevel();
+        this.showClassSelection();
     }
     
     gameLoop(timestamp) {
@@ -701,19 +781,20 @@ class Game {
 
 // Player Class
 class Player {
-    constructor(x, y) {
+    constructor(x, y, characterClass) {
         this.x = x;
         this.y = y;
         this.size = 24;
-        this.speed = 120;
-        this.health = 100;
-        this.maxHealth = 100;
-        this.damage = 25;
-        this.color = '#4da6ff';
-        this.attackRange = 50;
+        this.characterClass = characterClass;
+        this.speed = characterClass.speed;
+        this.health = characterClass.maxHealth;
+        this.maxHealth = characterClass.maxHealth;
+        this.damage = characterClass.damage;
+        this.color = characterClass.color;
+        this.attackRange = characterClass.attackRange;
         this.isAttacking = false;
         this.attackCooldown = 0;
-        this.attackDuration = 0.5;
+        this.attackDuration = characterClass.attackCooldown;
     }
     
     update(keys, dungeon, deltaTime) {

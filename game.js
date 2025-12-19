@@ -1296,10 +1296,11 @@ class Enemy {
                 ctx.fillRect(x + this.size - 5, y - 2, 3, 4);
                 break;
             case 'EldritchHorror':
-                // Tentacles
+                // Tentacles with optimized angle calculation
                 ctx.fillStyle = this.getDarkerShade(this.color);
+                const angleIncrement = Math.PI * 0.5; // PI * 2 / 4
                 for (let i = 0; i < 4; i++) {
-                    const angle = (i / 4) * Math.PI * 2;
+                    const angle = i * angleIncrement;
                     const tx = x + this.size / 2 + Math.cos(angle) * (this.size / 2 + 2);
                     const ty = y + this.size / 2 + Math.sin(angle) * (this.size / 2 + 2);
                     ctx.fillRect(Math.floor(tx), Math.floor(ty), 2, 3);

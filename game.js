@@ -580,17 +580,20 @@ class Game {
             return;
         }
         
+        // Get current time once for all rendering
+        const currentTime = Date.now();
+        
         // Draw dungeon
         this.renderDungeon();
         
         // Draw ambient particles (behind entities)
-        this.ambientParticles.forEach(p => p.render(this.ctx));
+        this.ambientParticles.forEach(p => p.render(this.ctx, currentTime));
         
         // Draw particles
         this.particles.forEach(p => p.render(this.ctx));
         
         // Draw enemies
-        this.enemies.forEach(e => e.render(this.ctx));
+        this.enemies.forEach(e => e.render(this.ctx, currentTime));
         
         // Draw player
         this.player.render(this.ctx);
@@ -631,7 +634,7 @@ class Game {
             
             // Instructions with pulsing effect
             this.ctx.font = '18px Arial';
-            const pulseAlpha = 0.5 + Math.sin(Date.now() / 300) * 0.5;
+            const pulseAlpha = 0.5 + Math.sin(currentTime / 300) * 0.5;
             this.ctx.fillStyle = `rgba(255, 255, 255, ${pulseAlpha})`;
             this.ctx.fillText('Press Enter for Next Level', 400, 355);
         }
@@ -748,7 +751,7 @@ class Game {
                             if (nx >= 0 && nx < GRID_WIDTH && ny >= 0 && ny < GRID_HEIGHT) {
                                 if (this.dungeon[ny][nx] === 1) {
                                     // Diagonal shadows are less intense
-                                    const isDiagonal = dx !== 0 && dy !== 0;
+                                    const isDiagonal = (dx !== 0 && dy !== 0);
                                     shadowIntensity += isDiagonal ? 0.03 : 0.06;
                                 }
                             }
@@ -1116,7 +1119,7 @@ class Enemy {
         this.health -= amount;
     }
     
-    render(ctx) {
+    render(ctx, currentTime) {
         // Draw enemy with enhanced pixel art style and type-specific features
         const halfSize = Math.floor(this.size / 2);
         const x = Math.floor(this.x - halfSize);
@@ -1174,7 +1177,7 @@ class Enemy {
         ctx.fillRect(Math.floor(this.x + eyeOffset - eyeSize), Math.floor(this.y - eyeOffset), eyeSize, eyeSize);
         
         // Eye highlights for menacing look with animation
-        const eyePulse = Math.sin(Date.now() / 200) * 0.3 + 0.7;
+        const eyePulse = Math.sin(currentTime / 200) * 0.3 + 0.7;
         ctx.fillStyle = `rgba(255, 100, 100, ${eyePulse})`;
         const highlightSize = Math.max(1, Math.floor(eyeSize / 2));
         ctx.fillRect(Math.floor(this.x - eyeOffset), Math.floor(this.y - eyeOffset), highlightSize, highlightSize);
@@ -1223,7 +1226,7 @@ class Enemy {
             ctx.fillRect(Math.floor(this.x - barWidth / 2), Math.floor(this.y - halfSize - 11), healthWidth, 2);
             
             // Animated shimmer effect on health bar
-            const shimmerPos = (Date.now() / 500) % 1;
+            const shimmerPos = (currentTime / 500) % 1;
             const shimmerX = Math.floor(this.x - barWidth / 2 + healthWidth * shimmerPos);
             ctx.fillStyle = 'rgba(255, 255, 255, 0.4)';
             ctx.fillRect(shimmerX, Math.floor(this.y - halfSize - 11), 2, barHeight);
@@ -1434,9 +1437,9 @@ class AmbientParticle {
         if (this.y > canvas.height + 10) this.y = -10;
     }
     
-    render(ctx) {
+    render(ctx, currentTime) {
         // Enhanced pulsing opacity effect with smoother animation
-        const pulse = Math.sin(Date.now() / 1000 * this.pulseSpeed + this.pulseOffset) * 0.5 + 0.5;
+        const pulse = Math.sin(currentTime / 1000 * this.pulseSpeed + this.pulseOffset) * 0.5 + 0.5;
         const alpha = this.opacity * pulse;
         
         ctx.fillStyle = this.color;

@@ -1,0 +1,50 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Roguelite Dungeon Crawler</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <div id="game-container">
+        <div id="ui">
+            <div id="stats">
+                <div class="stat-item">
+                    <span class="label">Health:</span>
+                    <div class="health-bar">
+                        <div id="health-fill" class="health-fill"></div>
+                    </div>
+                    <span id="health-text">100/100</span>
+                </div>
+                <div class="stat-item">
+                    <span class="label">Level:</span>
+                    <span id="level-text">1</span>
+                </div>
+                <div class="stat-item">
+                    <span class="label">Biome:</span>
+                    <span id="biome-text">Forest</span>
+                </div>
+                <div class="stat-item">
+                    <span class="label">Score:</span>
+                    <span id="score-text">0</span>
+                </div>
+            </div>
+        </div>
+        <canvas id="gameCanvas" width="800" height="600"></canvas>
+        <div id="game-over" class="hidden">
+            <h2>Game Over!</h2>
+            <p>Final Score: <span id="final-score">0</span></p>
+            <p>Level Reached: <span id="final-level">1</span></p>
+            <button id="restart-btn">Restart</button>
+        </div>
+        <div id="instructions">
+            <h3>Controls:</h3>
+            <p>Arrow Keys / WASD - Move</p>
+            <p>Space - Attack</p>
+            <p>Enter - Next Level (when clear)</p>
+        </div>
+    </div>
+    <script src="game.js"></script>
+</body>
+</html>
